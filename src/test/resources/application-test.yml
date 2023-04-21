@@ -1,0 +1,4 @@
+logging:
+  level:
+    com.mass: TRACE
+    org.apache.pdfbox.pdmodel.font.PDSimpleFont: OFF
