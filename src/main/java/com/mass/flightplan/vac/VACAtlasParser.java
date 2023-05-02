@@ -9,13 +9,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 @Component
@@ -32,8 +35,15 @@ public class VACAtlasParser {
 
     @SuppressWarnings("Duplicates")
     @NonNull
-    public Map<String, String> getAirportMap() {
-        String js = rt.getForObject(atlasProperties.getAirportListJsUrl(), String.class);
+    public Map<String, String> fetchAirportMap()
+        throws IOException, ExecutionException
+    {
+        String js;
+        try {
+            js = rt.getForObject(atlasProperties.getAirportListJsUrl(), String.class);
+        } catch (RestClientException e) {
+            throw new IOException("Could not fetch airport map from " + atlasProperties.getAirportListJsUrl(), e);
+        }
 
         log.debug("Got airport list JS: {}", js);
 
@@ -66,21 +76,25 @@ public class VACAtlasParser {
         List<Object> airportNames = varExtractor.apply("vaeroportlong");
 
         if(airportIds == null || airportIds.isEmpty()){
-            throw new IllegalArgumentException("Could not find airport IDs in " + js);
+            throw new ExecutionException(new IllegalArgumentException("Could not find airport IDs in " + js));
         }
         else if(airportNames == null || airportNames.isEmpty()){
-            throw new IllegalArgumentException("Could not find airport names in " + js);
+            throw new ExecutionException(new IllegalArgumentException("Could not find airport names in " + js));
         }
         else if(airportIds.size() != airportNames.size()){
-            throw new IllegalArgumentException(String.format(
+            throw new ExecutionException(new IllegalArgumentException(String.format(
                     "Airport IDs list and airport names list differ in size (%d != %d): %s",
                     airportIds.size(), airportNames.size(), js
-            ));
+            )));
         }
 
         Map<String, String> ret = new HashMap<>();
         for(int ii = 0; ii < airportIds.size(); ii++){
-            ret.put(airportIds.get(ii).toString(), airportNames.get(ii).toString());
+            if(atlasProperties.getIgnoredAirports().contains(airportIds.get(ii).toString())){
+                log.info("Ignoring airport (per config): {} - {}", airportIds.get(ii), airportNames.get(ii));
+            } else {
+                ret.put(airportIds.get(ii).toString(), airportNames.get(ii).toString());
+            }
         }
 
         return ret;
@@ -88,13 +102,20 @@ public class VACAtlasParser {
 
     @SuppressWarnings("Duplicates")
     @NonNull
-    public Map<String, String> getHeliportMap() {
-        String js = rt.getForObject(atlasProperties.getHeliportListJsUrl(), String.class);
+    public Map<String, String> fetchHelipadMap()
+        throws IOException, ExecutionException
+    {
+        String js;
+        try {
+            js = rt.getForObject(atlasProperties.getHelipadListJsUrl(), String.class);
+        } catch (RestClientException e) {
+            throw new IOException("Could not load helipad list from " + atlasProperties.getHelipadListJsUrl(), e);
+        }
 
-        log.debug("Got heliport list JS: {}", js);
+        log.debug("Got helipad list JS: {}", js);
 
         Parser p = Parser.create();
-        CompilationUnitTree cut = p.parse("vacAtlasHeliportList", js, null);
+        CompilationUnitTree cut = p.parse("vacAtlasHelipadList", js, null);
 
         TreeVisitor<Void, List<Object>> arrayExtractor = new SimpleTreeVisitorES6<>() {
             @Override
@@ -118,25 +139,29 @@ public class VACAtlasParser {
             return stash;
         };
 
-        List<Object> heliportIds = varExtractor.apply("vaerosoussection");
-        List<Object> heliportNames = varExtractor.apply("vaeroportlong");
+        List<Object> helipadIds = varExtractor.apply("vaerosoussection");
+        List<Object> helipadNames = varExtractor.apply("vaeroportlong");
 
-        if(heliportIds == null || heliportIds.isEmpty()){
-            throw new IllegalArgumentException("Could not find heliport IDs in " + js);
+        if(helipadIds == null || helipadIds.isEmpty()){
+            throw new ExecutionException(new IllegalArgumentException("Could not find helipad IDs in " + js));
         }
-        else if(heliportNames == null || heliportNames.isEmpty()){
-            throw new IllegalArgumentException("Could not find heliport names in " + js);
+        else if(helipadNames == null || helipadNames.isEmpty()){
+            throw new ExecutionException(new IllegalArgumentException("Could not find helipad names in " + js));
         }
-        else if(heliportIds.size() != heliportNames.size()){
-            throw new IllegalArgumentException(String.format(
-                    "Heliport IDs list and heliport names list differ in size (%d != %d): %s",
-                    heliportIds.size(), heliportNames.size(), js
-            ));
+        else if(helipadIds.size() != helipadNames.size()){
+            throw new ExecutionException(new IllegalArgumentException(String.format(
+                    "Helipad IDs list and helipad names list differ in size (%d != %d): %s",
+                    helipadIds.size(), helipadNames.size(), js
+            )));
         }
 
         Map<String, String> ret = new HashMap<>();
-        for(int ii = 0; ii < heliportIds.size(); ii++){
-            ret.put(heliportIds.get(ii).toString(), heliportNames.get(ii).toString());
+        for(int ii = 0; ii < helipadIds.size(); ii++){
+            if(atlasProperties.getIgnoredAirports().contains(helipadIds.get(ii).toString())){
+                log.info("Ignoring airport (per config): {} - {}", helipadIds.get(ii), helipadNames.get(ii));
+            } else {
+                ret.put(helipadIds.get(ii).toString(), helipadNames.get(ii).toString());
+            }
         }
 
         return ret;
@@ -148,7 +173,12 @@ public class VACAtlasParser {
         String url = atlasProperties.getAirportCardUrlTemplate().replace("{code}", airportCode);
         log.debug("Downloading card for airport {} from {}...", airportCode, url);
 
-        ResponseEntity<Resource> resp = rt.getForEntity(url, Resource.class);
+        ResponseEntity<Resource> resp;
+        try {
+            resp = rt.getForEntity(url, Resource.class);
+        } catch (RestClientException e) {
+            throw new IOException("Could not load airport list from " + url, e);
+        }
 
         if(!resp.getStatusCode().is2xxSuccessful()){
             throw new IOException(String.format(
@@ -164,32 +194,37 @@ public class VACAtlasParser {
             ));
         }
 
-        return resp.getBody();
+        return new ResourceWithUriDescriptor(resp.getBody(), URI.create(url));
     }
 
-    public Resource fetchHeliportVacCard(@NonNull String heliportCode)
+    public Resource fetchHelipadVacCard(@NonNull String helipadCode)
             throws IOException
     {
-        String url = atlasProperties.getHeliportCardUrlTemplate().replace("{code}", heliportCode);
-        log.debug("Downloading card for heliport {} from {}...", heliportCode, url);
+        String url = atlasProperties.getHelipadCardUrlTemplate().replace("{code}", helipadCode);
+        log.debug("Downloading card for helipad {} from {}...", helipadCode, url);
 
-        ResponseEntity<Resource> resp = rt.getForEntity(url, Resource.class);
+        ResponseEntity<Resource> resp;
+        try {
+            resp = rt.getForEntity(url, Resource.class);
+        } catch (RestClientException e) {
+            throw new IOException("Could not download HVAC entry from " + url, e);
+        }
 
         if(!resp.getStatusCode().is2xxSuccessful()){
             throw new IOException(String.format(
-                    "Could not get VAC card for heliport '%s' from '%s': got response %s",
-                    heliportCode, url, resp.getStatusCode()
+                    "Could not get VAC card for helipad '%s' from '%s': got response %s",
+                    helipadCode, url, resp.getStatusCode()
             ));
         }
 
         if(!MediaType.APPLICATION_PDF.isCompatibleWith(resp.getHeaders().getContentType())){
             throw new IOException(String.format(
-                    "Invalid VAC card for heliport %s at %s: expected PDF, but got %s",
-                    heliportCode, url, resp.getHeaders().getContentType()
+                    "Invalid VAC card for helipad %s at %s: expected PDF, but got %s",
+                    helipadCode, url, resp.getHeaders().getContentType()
             ));
         }
 
-        return resp.getBody();
+        return new ResourceWithUriDescriptor(resp.getBody(), URI.create(url));
     }
 
 }

@@ -1,18 +1,20 @@
 package com.mass.flightplan.vac;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.ToString;
 import lombok.Value;
-import org.springframework.data.util.Pair;
+import org.springframework.data.annotation.PersistenceCreator;
 
 @Value
 @Builder
 @ToString
+@AllArgsConstructor(onConstructor=@__({@PersistenceCreator}))
 public class RunwayInfo {
-    Pair<String, String> shortOrientation;
-    Pair<Integer, Integer> magneticOrientation;
-    int length;
-    int width;
+    String code;
+    int qfu;
+    double length;
+    double width;
     boolean paved;
 }

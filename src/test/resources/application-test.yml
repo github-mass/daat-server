@@ -2,3 +2,7 @@ logging:
   level:
     com.mass: TRACE
     org.apache.pdfbox.pdmodel.font.PDSimpleFont: OFF
+
+vac-atlas:
+  update:
+    enabled: false

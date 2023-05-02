@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -34,8 +35,10 @@ class VACAtlasParserTest {
     VACAtlasParser atlasParser;
 
     @Test
-    public void testVacAirportList() {
-        Map<String, String> airports = atlasParser.getAirportMap();
+    public void testVacAirportList()
+        throws IOException, ExecutionException
+    {
+        Map<String, String> airports = atlasParser.fetchAirportMap();
 
         assertThat(airports).isNotEmpty();
 
@@ -43,8 +46,10 @@ class VACAtlasParserTest {
     }
 
     @Test
-    public void testVacHeliportList() {
-        Map<String, String> heliports = atlasParser.getHeliportMap();
+    public void testVacHeliportList()
+        throws IOException, ExecutionException
+    {
+        Map<String, String> heliports = atlasParser.fetchHelipadMap();
 
         assertThat(heliports).isNotEmpty();
 
@@ -52,7 +57,7 @@ class VACAtlasParserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"LFPG"})
+    @ValueSource(strings = {"LFIP"})
     public void testAirportCardDownload(String code)
             throws IOException
     {
@@ -63,7 +68,7 @@ class VACAtlasParserTest {
         long len = res.contentLength();
         assertThat(len).withFailMessage("Expected VAC resource to be at least 50kB, but got: %dkB", len >>> 10).isGreaterThanOrEqualTo(50 << 10);
 
-        Path tmp = Paths.get("./vac-atlas/test/" + code + ".pdf");
+        Path tmp = Paths.get("./vac-atlas/vac/" + code + ".pdf");
         Files.createDirectories(tmp.getParent());
         try (OutputStream out = Files.newOutputStream(tmp, CREATE, TRUNCATE_EXISTING)) {
             StreamUtils.copy(res.getInputStream(), out);
@@ -73,18 +78,18 @@ class VACAtlasParserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"HMTL"})
+    @ValueSource(strings = {"LFWN"})
     public void testHeliportCardDownload(String code)
             throws IOException
     {
-        Resource res = atlasParser.fetchHeliportVacCard(code);
+        Resource res = atlasParser.fetchHelipadVacCard(code);
 
         assertThat(res).isNotNull();
 
         long len = res.contentLength();
         assertThat(len).withFailMessage("Expected VAC resource to be at least 50kB, but got: %dkB", len >>> 10).isGreaterThanOrEqualTo(50 << 10);
 
-        Path tmp = Paths.get("./vac-atlas/test/" + code + ".pdf");
+        Path tmp = Paths.get("./vac-atlas/hvac/" + code + ".pdf");
         Files.createDirectories(tmp.getParent());
         try (OutputStream out = Files.newOutputStream(tmp, CREATE, TRUNCATE_EXISTING)) {
             StreamUtils.copy(res.getInputStream(), out);

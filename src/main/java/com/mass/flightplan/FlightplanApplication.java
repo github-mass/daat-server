@@ -2,11 +2,10 @@ package com.mass.flightplan;
 
 import com.mass.flightplan.vac.VACAtlasProperties;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(
     exclude = {DataSourceAutoConfiguration.class}
@@ -14,6 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties(
         VACAtlasProperties.class
 )
+@EnableScheduling
 public class FlightplanApplication {
 
     public static void main(String[] args) {

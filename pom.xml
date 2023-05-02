@@ -20,7 +20,29 @@
         <pdfbox.version>2.0.28</pdfbox.version>
         <geotools.version>27.2</geotools.version>
         <tesseract-platform.version>5.0.1-1.5.7</tesseract-platform.version>
+        <spring-data.version>2022.0.5</spring-data.version>
+        <jsoup.version>1.15.4</jsoup.version>
+        <spring-cloud.version>2022.0.1</spring-cloud.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-bom</artifactId>
+                <version>${spring-data.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -37,6 +59,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
@@ -46,6 +73,7 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -55,6 +83,13 @@
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <!-- jsoup HTML parser library @ https://jsoup.org/ -->
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.nashorn</groupId>
@@ -83,15 +118,23 @@
             <id>osgeo</id>
             <name>OSGeo Release Repository</name>
             <url>https://repo.osgeo.org/repository/release/</url>
-            <snapshots><enabled>false</enabled></snapshots>
-            <releases><enabled>true</enabled></releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
         </repository>
         <repository>
             <id>osgeo-snapshot</id>
             <name>OSGeo Snapshot Repository</name>
             <url>https://repo.osgeo.org/repository/snapshot/</url>
-            <snapshots><enabled>true</enabled></snapshots>
-            <releases><enabled>false</enabled></releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
     </repositories>
 

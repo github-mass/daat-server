@@ -5,13 +5,11 @@ import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
 
-import java.time.LocalDate;
-
 @Value
 @Builder
 @ToString
-public class HeliportInfo {
-    @NonNull String code, name;
+public class HelipadInfo {
+    @NonNull String code, name, eAipVersion;
     @NonNull int altitude;
     @NonNull double latitude;
     @NonNull double longitude;
