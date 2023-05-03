@@ -4,14 +4,9 @@ import com.mass.flightplan.vac.RunwayInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.geo.Point;
-import org.springframework.data.util.Pair;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.Instant;
 import java.util.List;
@@ -33,10 +28,10 @@ class VacCrudRepositoryTest {
                                         .name("PARIS CHARLES DE GAULLE")
                                         .eAipVersion("EIP_VERSION")
                                         .updated(update)
-                                        .altitude(392)
+                                        .altitudeInMeters(119.4816)
                                         .localPressure(14)
                                         .coordinates(new Point(2.5477777777777777, 49.00972222222222))
-                                        .contactInfo("Aéroports de Paris. TEL : 01 48 62 25 25 / 71 72.")
+                                        .contactInfo("Aéroports de Paris. TEL . 01 48 62 25 25 / 71 72.")
                                         .runways(List.of(
                                             RunwayInfo.builder().code("09L").qfu(84).length(2700).width(60).paved(true).build(),
                                             RunwayInfo.builder().code("27R").qfu(264).length(2700).width(60).paved(true).build(),

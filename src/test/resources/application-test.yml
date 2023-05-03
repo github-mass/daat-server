@@ -7,6 +7,11 @@ vac-atlas:
   update:
     enabled: false
 
+altitude-service:
+  type: "ign"
+  ign:
+    rest-service-url: 'https://wxs.ign.fr/calcul/alti/rest/elevation.json'
+
 de:
   flapdoodle:
     mongodb:

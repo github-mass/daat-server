@@ -5,9 +5,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.geotools.measure.Units;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
 
+import javax.measure.UnitConverter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +25,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.mass.flightplan.vac.TextBlock.*;
+import static com.mass.flightplan.vac.TextBlock.Comp;
+import static com.mass.flightplan.vac.TextBlock.Utils;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 
@@ -42,6 +45,9 @@ public class BlockVAChartParser
 
     private Path tmpDir;
 
+    private UnitConverter FEET_TO_METRES;
+
+
     @PostConstruct
     private void init()
         throws IOException
@@ -49,6 +55,8 @@ public class BlockVAChartParser
         if (keepFiles) {
             tmpDir = Files.createTempDirectory("flightplan-vac-pdf");
         }
+
+        FEET_TO_METRES = Units.FOOT.getConverterTo(Units.METRE);
     }
 
     private void maybeKeepOutput(Resource pdf, String code, VacPdfExtractor.Result extractionResult) {
@@ -103,7 +111,9 @@ public class BlockVAChartParser
         var alt = find(blocks, ALTITUDE_PATTERN)
             .map(m -> m.group(1)).map(Integer::parseInt)
             .orElseThrow(() -> new IllegalArgumentException("Could not find altitude in VAC PDF text"));
-        builder.altitude(alt);
+
+        // Convert altitude to meters
+        builder.altitude(FEET_TO_METRES.convert(alt).doubleValue());
 
         var psi = find(blocks, QFE_PATTERN)
             .map(m -> m.group(1)).map(Integer::parseInt)
@@ -626,6 +636,7 @@ public class BlockVAChartParser
                     .filter(TextBlock.Utils.find(pattern))
                     .map(b -> {
                         Matcher m = pattern.matcher(b.text());
+                        //noinspection ResultOfMethodCallIgnored
                         m.find();
                         return m;
                     })
@@ -663,8 +674,10 @@ public class BlockVAChartParser
 
     private static int parseQfu(String qfu) {
         int end;
+        //noinspection StatementWithEmptyBody
         for (end = qfu.length(); qfu.charAt(end - 1) == '°'; --end) ;
         int start;
+        //noinspection StatementWithEmptyBody
         for (start = 0; start < end - 1 && qfu.charAt(start) == '0'; ++start) ;
         return Integer.parseInt(qfu, start, end, 10);
     }

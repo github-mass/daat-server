@@ -13,11 +13,15 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import tec.units.ri.unit.Units;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
 import java.time.Instant;
 import java.util.List;
 
 import static java.time.Instant.now;
+import static tec.units.ri.quantity.Quantities.getQuantity;
 
 @Document(collection = "vacs")
 @TypeAlias("airport")
@@ -48,8 +52,11 @@ public class AirportEntity {
     @Builder.Default
     boolean forceUpdate = false;
 
+    /**
+     * Altitude in meters AMSL
+     */
     @Field(name = "alt")
-    int altitude;
+    double altitudeInMeters;
 
     @Field(name = "loc")
     @GeoSpatialIndexed(name = "vac_loc_idx")
@@ -64,5 +71,9 @@ public class AirportEntity {
     @NonNull boolean runwaysOk;
 
     @NonNull List<RunwayInfo> runways;
+
+    public Quantity<Length> altitude(){
+        return getQuantity(altitudeInMeters, Units.METRE);
+    }
 
 }
