@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.refresh.enabled=true"
 })
 @Log4j2
+@ActiveProfiles("test")
 class SIAVersionFinderTest {
 
     @Autowired

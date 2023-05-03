@@ -68,7 +68,7 @@ class VACAtlasParserTest {
         long len = res.contentLength();
         assertThat(len).withFailMessage("Expected VAC resource to be at least 50kB, but got: %dkB", len >>> 10).isGreaterThanOrEqualTo(50 << 10);
 
-        Path tmp = Paths.get("./vac-atlas/vac/" + code + ".pdf");
+        Path tmp = Paths.get("./test-atlas/vac/" + code + ".pdf");
         Files.createDirectories(tmp.getParent());
         try (OutputStream out = Files.newOutputStream(tmp, CREATE, TRUNCATE_EXISTING)) {
             StreamUtils.copy(res.getInputStream(), out);
@@ -89,7 +89,7 @@ class VACAtlasParserTest {
         long len = res.contentLength();
         assertThat(len).withFailMessage("Expected VAC resource to be at least 50kB, but got: %dkB", len >>> 10).isGreaterThanOrEqualTo(50 << 10);
 
-        Path tmp = Paths.get("./vac-atlas/hvac/" + code + ".pdf");
+        Path tmp = Paths.get("./test-atlas/hvac/" + code + ".pdf");
         Files.createDirectories(tmp.getParent());
         try (OutputStream out = Files.newOutputStream(tmp, CREATE, TRUNCATE_EXISTING)) {
             StreamUtils.copy(res.getInputStream(), out);

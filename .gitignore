@@ -31,5 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
-/test-atlas/
 /mongodb-data/
