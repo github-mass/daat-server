@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.geo.Point;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,7 +27,7 @@ class VacCrudRepositoryTest {
                                         .name("PARIS CHARLES DE GAULLE")
                                         .eAipVersion("EIP_VERSION")
                                         .updated(update)
-                                        .altitudeInMeters(119.4816)
+                                        .altitudeInMetres(119.4816)
                                         .localPressure(14)
                                         .coordinates(new Point(2.5477777777777777, 49.00972222222222))
                                         .contactInfo("Aéroports de Paris. TEL . 01 48 62 25 25 / 71 72.")

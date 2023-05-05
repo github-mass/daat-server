@@ -4,7 +4,7 @@ import lombok.*;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.log4j.Log4j2;
 import org.geotools.measure.Units;
-import org.locationtech.jts.geom.Coordinate;
+import org.springframework.data.geo.Point;
 import org.springframework.web.reactive.function.client.WebClient;
 import si.uom.quantity.impl.LengthAmount;
 
@@ -21,7 +21,7 @@ public class IgnAltitudeService
     private final @NonNull AltitudeServiceProperties.IgnServiceProperties properties;
 
     @Override
-    public Length getAltitudeAt(Coordinate coordinate)
+    public Length getAltitudeAt(Point coordinate)
     {
         try {
             var alt = queryAltitude(coordinate);
@@ -35,7 +35,7 @@ public class IgnAltitudeService
         }
     }
 
-    private IgnAltitude queryAltitude(Coordinate c) {
+    private IgnAltitude queryAltitude(Point c) {
         log.debug("Querying altitude using IGN service for: lat={}, lon={}", c.getY(), c.getX());
 
         var resp = webClient

@@ -1,11 +1,11 @@
 package com.mass.flightplan.geo;
 
-import org.locationtech.jts.geom.Coordinate;
+import org.springframework.data.geo.Point;
 
 import javax.measure.quantity.Length;
 
 public interface AltitudeService {
 
-    Length getAltitudeAt(Coordinate coordinate);
+    Length getAltitudeAt(Point coordinate);
 
 }

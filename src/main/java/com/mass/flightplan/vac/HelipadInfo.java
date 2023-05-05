@@ -10,9 +10,10 @@ import lombok.Value;
 @ToString
 public class HelipadInfo {
     @NonNull String code, name, eAipVersion;
-    @NonNull int altitude;
-    @NonNull double latitude;
-    @NonNull double longitude;
-    @NonNull int localPressure;
+    int altitude;
+    double latitude;
+    double longitude;
+    int localPressure;
+    double magneticDeclination;
     @NonNull String contactInfo;
 }

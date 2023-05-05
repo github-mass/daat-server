@@ -1,11 +1,16 @@
 package com.mass.flightplan.geo;
 
+import com.mass.flightplan.db.HvacCrudRepository;
+import com.mass.flightplan.db.VacCrudRepository;
+import com.mass.flightplan.db.VacDataCrudRepository;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.ssl.SslContextBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,6 +21,7 @@ import javax.net.ssl.SSLException;
 
 @Configuration
 @RequiredArgsConstructor
+@Import(WebClientAutoConfiguration.class)
 public class GeoConfiguration {
 
     @ConditionalOnProperty(name = "altitude-service.type", havingValue = "ign")
@@ -41,5 +47,16 @@ public class GeoConfiguration {
                       .secure(spec -> spec.sslContext(sslContext))
                       .wiretap(IgnAltitudeService.class.getCanonicalName(), LogLevel.TRACE, AdvancedByteBufFormat.TEXTUAL)
         );
+    }
+
+    @Bean
+    public AirportProximityService proximityService(
+        AltitudeService altitudeService,
+        VacCrudRepository vacRepository,
+        HvacCrudRepository hvacRepository,
+        VacDataCrudRepository dataRepository,
+        AirportProximityProperties properties
+    ){
+        return new AirportProximityService(altitudeService, vacRepository, hvacRepository, dataRepository, properties);
     }
 }

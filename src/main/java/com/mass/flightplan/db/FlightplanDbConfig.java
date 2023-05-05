@@ -9,19 +9,25 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.lang.NonNull;
 
 @Configuration
 @EnableMongoRepositories
-public class FlightplanDbConfig extends AbstractMongoClientConfiguration {
+public class FlightplanDbConfig
+    extends AbstractMongoClientConfiguration
+{
 
     @Override
+    @NonNull
     protected String getDatabaseName() {
         return "flightplan";
     }
 
     @Override
     @Bean
-    public MappingMongoConverter mappingMongoConverter(MongoDatabaseFactory databaseFactory, MongoCustomConversions customConversions, MongoMappingContext mappingContext) {
+    @NonNull
+    public MappingMongoConverter mappingMongoConverter(@NonNull MongoDatabaseFactory databaseFactory, @NonNull MongoCustomConversions customConversions, @NonNull MongoMappingContext mappingContext)
+    {
         var ret = super.mappingMongoConverter(databaseFactory, customConversions, mappingContext);
 
         /*
@@ -30,5 +36,10 @@ public class FlightplanDbConfig extends AbstractMongoClientConfiguration {
         ret.setTypeMapper(new DefaultMongoTypeMapper(null));
 
         return ret;
+    }
+
+    @Override
+    protected boolean autoIndexCreation() {
+        return true;
     }
 }

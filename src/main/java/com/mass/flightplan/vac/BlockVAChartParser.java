@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.mass.flightplan.vac.TextBlock.Comp;
 import static com.mass.flightplan.vac.TextBlock.Utils;
+import static java.lang.Integer.parseInt;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 
@@ -119,6 +120,12 @@ public class BlockVAChartParser
             .map(m -> m.group(1)).map(Integer::parseInt)
             .orElseThrow(() -> new IllegalArgumentException("Could not find local pressure in VAC PDF text"));
         builder.localPressure(psi);
+
+        var magDec = find(blocks, MAG_DEC_PATTERN)
+            .or(() -> find(blocks, MAG_DEC_PATTERN_IDIOT))
+            .map(m -> (m.group(2).equals("W") ? -1 : 1) * parseInt(m.group(1)))
+            .orElseThrow(() -> new IllegalArgumentException("Could not find magnetic declination in VAC PDF text"));
+        builder.magneticDeclination(magDec);
 
         var lat = find(blocks, LAT_PATTERN)
             .map(m ->
@@ -462,6 +469,12 @@ public class BlockVAChartParser
             .orElseThrow(() -> new IllegalArgumentException("Could not find local pressure in HVAC PDF text"));
         builder.localPressure(psi);
 
+        var magDec = find(blocks, MAG_DEC_PATTERN)
+            .or(() -> find(blocks, MAG_DEC_PATTERN_IDIOT))
+            .map(m -> (m.group(2).equals("W") ? -1 : 1) * parseInt(m.group(1)))
+            .orElseThrow(() -> new IllegalArgumentException("Could not find magnetic declination in HVAC PDF text"));
+        builder.magneticDeclination(magDec);
+
         var lat = find(blocks, LAT_PATTERN)
             .map(m ->
                 (m.group(4).equals("S") ? -1d : 1d)
@@ -541,7 +554,7 @@ public class BlockVAChartParser
                     || m.group(2).toLowerCase().contains("gestionnaire")
                     || m.group(2).matches("(?i).*exploitant d.aérodrome.*")
                 ) {
-                    operatorInfoNum = Integer.parseInt(m.group(1));
+                    operatorInfoNum = parseInt(m.group(1));
                     glob = true;
 
                     var s = m.group(2).substring(m.group(2).indexOf(':') + 1).trim();
@@ -562,7 +575,7 @@ public class BlockVAChartParser
                         sb.append(LINE_SEP);
                     }
                 }
-                else if (Integer.parseInt(m.group(1)) == operatorInfoNum + 1) {
+                else if (parseInt(m.group(1)) == operatorInfoNum + 1) {
                     if (glob) break;
                 }
             }
@@ -590,44 +603,6 @@ public class BlockVAChartParser
 
     static Optional<CharSequence> extractAirportContact(VacPdfExtractor.Result extractionResult)
     {
-//        Pattern operatorInfo = Pattern.compile("^\\W*(\\d+)\\s*-.*(?:operator|administrator)", CASE_INSENSITIVE);
-//        //we can have arrows at the start of the line sometimes, e.g.:
-//        // "← 4 - Exploitant d’aérodrome / AD operator"
-//        Pattern numberedInfo = Pattern.compile("^\\W*(\\d+)\\s*-\\s*(.*)");
-//
-//        Optional<? extends TextBlock> opt = blocks.stream().filter(TextBlock.Utils.find(operatorInfo)).findFirst();
-//        if (opt.isEmpty()) {
-//            return Optional.empty();
-//        }
-//        // Allow for some horizontal distance
-//        List<TextBlock> column = blocks.stream().collect(TextBlock.Utils.extractColumn(opt.get(), hRelDistMax(.2), vRelDistMax(.5), true));
-//
-//        StringBuilder sb = new StringBuilder();
-//        boolean on = false;
-//
-//        for (TextBlock block : column) {
-//            Matcher m = numberedInfo.matcher(block.text());
-//
-//            if (m.matches()) {
-//                if (m.group(2).contains("AD operator")) {
-//                    on = true;
-//                    int idx = block.text().indexOf("AD operator");
-//                    idx = block.text().indexOf(':', idx);
-//                    sb.append(block.text().substring(idx + 1).trim());
-//                    sb.append(LINE_SEP);
-//                }
-//                else {
-//                    if(on) break;
-//                }
-//            }
-//            else if (on) {
-//                sb.append(block.text());
-//                sb.append(LINE_SEP);
-//            }
-//        }
-//
-//        return sb.isEmpty() ? Optional.empty() : Optional.of(sb);
-
         return extractHelipadContact(extractionResult);
     }
 
@@ -662,6 +637,8 @@ public class BlockVAChartParser
     private static final Pattern QFE_PATTERN = Pattern.compile("\\((\\d+) *hPa\\)");
     private static final Pattern LAT_PATTERN = Pattern.compile("(\\d{2}) *(\\d{2}) *(\\d{2}) *([NS])");
     private static final Pattern LON_PATTERN = Pattern.compile("(\\d{3}) *(\\d{2}) *(\\d{2}) *([EW])");
+    private static final Pattern MAG_DEC_PATTERN = compile("VAR\\s*:\\s*(\\d+)°\\s*([EW]?)");
+    private static final Pattern MAG_DEC_PATTERN_IDIOT = compile("VAR\\s*:\\s*(\\d+)\\s*([EW])°");
 
     private static final String LINE_SEP = "\n";
 
@@ -679,6 +656,6 @@ public class BlockVAChartParser
         int start;
         //noinspection StatementWithEmptyBody
         for (start = 0; start < end - 1 && qfu.charAt(start) == '0'; ++start) ;
-        return Integer.parseInt(qfu, start, end, 10);
+        return parseInt(qfu, start, end, 10);
     }
 }

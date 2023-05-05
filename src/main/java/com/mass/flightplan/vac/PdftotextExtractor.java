@@ -4,9 +4,9 @@ import com.mass.flightplan.util.InvalidXmlCharFilterReader;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.pdfbox.io.IOUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.StreamUtils;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -193,7 +193,7 @@ public class PdftotextExtractor
         Future<Void> feeder = executor.submit(() -> {
             OutputStream processInput = p.getOutputStream();
             try (InputStream is = pdf.getInputStream()) {
-                IOUtils.copy(is, processInput);
+                StreamUtils.copy(is, processInput);
             }
 
             processInput.close();

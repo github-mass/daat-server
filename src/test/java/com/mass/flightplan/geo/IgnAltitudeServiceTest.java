@@ -3,13 +3,12 @@ package com.mass.flightplan.geo;
 import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateXY;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.geo.Point;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
@@ -28,7 +27,7 @@ class IgnAltitudeServiceTest {
 
     @Test
     public void basicServiceTest(){
-        Coordinate coord = new CoordinateXY(
+        Point coord = new Point(
             2 + 33d / 60 + 1d / 3600,
             51 + 2d / 60 + 26d / 3600
         );

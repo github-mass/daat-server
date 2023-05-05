@@ -16,13 +16,15 @@ public class AirportInfo {
     /**
      * Altitude in meters AMSL
      */
-    @NonNull double altitude;
+    double altitude;
 
-    @NonNull double latitude;
+    double latitude;
 
-    @NonNull double longitude;
+    double longitude;
 
-    @NonNull int localPressure;
+    int localPressure;
+
+    double magneticDeclination;
 
     @NonNull String contactInfo;
 

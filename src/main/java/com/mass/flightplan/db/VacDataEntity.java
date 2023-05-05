@@ -1,9 +1,7 @@
 package com.mass.flightplan.db;
 
-import com.mongodb.lang.NonNull;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,16 +20,12 @@ public class VacDataEntity {
     @Version
     private Instant updated = now();
 
-    @NonNull
     private String url;
 
-    @NonNull
     private String code;
 
-    @NonNull
     private Type type;
 
-    @NonNull
     private byte[] data;
 
     public enum Type {
