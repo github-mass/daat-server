@@ -1,0 +1,107 @@
+package com.mass.flightplan;
+
+import com.mass.flightplan.aixm.AixmImporter;
+import com.mass.flightplan.db.AixmDbImporter;
+import com.mass.flightplan.db.DatasetEntity;
+import com.mass.flightplan.db.DatasetRepository;
+import com.mass.flightplan.geo.AltitudeService;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@RequiredArgsConstructor
+@Slf4j
+public class AixmUpdateService {
+
+    private final @NonNull AixmProperties properties;
+    private final @NonNull AltitudeService altitudeService;
+    private final @NonNull AixmDbImporter dbImporter;
+
+    private final @NonNull DatasetRepository dataSetRepo;
+
+    @Scheduled(
+        initialDelayString = "${aixm.update.initial-delay}",
+        fixedDelayString = "${aixm.update.fixed-delay}",
+        timeUnit = TimeUnit.MINUTES
+    )
+    public void checkForUpdate(){
+        if(!properties.getUpdate().isEnabled()){
+            return ;
+        }
+
+        try {
+            log.info("Checking for updated sources");
+
+            List<String> todo = sourcesToBeImported();
+
+            log.info("Found sources to import: {}", todo);
+
+            performImport(todo);
+        }
+        catch (Throwable t) {
+            log.error("Unexpected error in AIXM update service", t);
+        }
+    }
+
+    private List<String> sourcesToBeImported() {
+        List<String> sources = properties.getImport().getSources();
+        if(sources == null || sources.isEmpty()){
+            return List.of();
+        }
+
+        List<String> copy = new ArrayList<>(sources);
+
+        for (DatasetEntity dse : dataSetRepo.findAll()) {
+            copy.remove(dse.sourceName());
+        }
+
+        return copy;
+    }
+
+    void performImport(List<String> sources) {
+        for (String source : sources) {
+            log.info("Trying to import: {}", source);
+
+            Resource res;
+            try {
+                URI uri = URI.create(source);
+                res = new UrlResource(uri);
+            }
+            catch (IllegalArgumentException | MalformedURLException x) {
+                log.error("Invalid data source: {}, not a valid URI", source, x);
+                continue;
+            }
+
+            try {
+                performImport(source, res);
+            }
+            catch (Exception x) {
+                log.error("Import failed for {}", source, x);
+            }
+        }
+    }
+
+    void performImport(String name, Resource resource)
+        throws Exception
+    {
+        AixmImporter imp = AixmImporter.builder()
+                                       .sourceName(name)
+                                       .sourceType("SIA/AIXM")
+                                       .altitudeService(altitudeService)
+                                       .parseSiaExport(properties.getImport().isParseSiaExport())
+                                       .source(resource)
+                                       .build();
+
+        var result = imp.perform();
+        dbImporter.importResult(result);
+    }
+}

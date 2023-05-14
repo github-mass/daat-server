@@ -1,28 +1,36 @@
 package com.mass.flightplan;
 
-import com.mass.flightplan.vac.VACAtlasParser;
-import com.mass.flightplan.vac.VACAtlasProperties;
-import com.mass.flightplan.vac.VAChartParser;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.mass.flightplan.db.AixmDbImporter;
+import com.mass.flightplan.db.DatasetRepository;
+import com.mass.flightplan.geo.AltitudeService;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
-
-import java.time.Duration;
+import org.springframework.lang.NonNull;
 
 @Configuration
 public class ApplicationConfiguration {
 
     @Bean
-    @ConditionalOnProperty(value = "vac-atlas.update.enabled", havingValue = "true")
-    public VacUpdateService vacUpdateService(
-        VACAtlasProperties atlasProperties, VACAtlasParser atlasParser, VAChartParser chartParser,
-        MongoTemplate mongoTemplate,
-        @Value("${vac-atlas.update.refresh-when-older-than:1d}") Duration refreshWhenOlderThan,
-        @Value("${vac-atlas.update.max-errors:3}") int maxErrors
+    @RefreshScope
+    public AixmProperties aixmProperties(){
+        return new AixmProperties();
+    }
+
+    @Bean
+    public AixmDbImporter aixmDbImporter(@NonNull MongoTemplate mongo){
+        return new AixmDbImporter(mongo);
+    }
+
+    @Bean
+    public AixmUpdateService aixmUpdateService(
+        @NonNull AixmProperties properties,
+        @NonNull AltitudeService altitudeService,
+        @NonNull AixmDbImporter dbImporter,
+        @NonNull DatasetRepository dataSetRepo
     ){
-        return new VacUpdateService(refreshWhenOlderThan, maxErrors, atlasProperties, atlasParser, chartParser, mongoTemplate);
+        return new AixmUpdateService(properties, altitudeService, dbImporter, dataSetRepo);
     }
 
 }

@@ -1,0 +1,80 @@
+package com.mass.flightplan.aixm;
+
+import com.mass.flightplan.util.XPathDocumentExtractor;
+import org.intellij.lang.annotations.Language;
+import org.opengis.referencing.operation.TransformException;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.w3c.dom.Node;
+
+import javax.xml.xpath.XPathExpressionException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static com.mass.flightplan.aixm.AixmUtils.mapAttributes;
+import static com.mass.flightplan.aixm.AixmUtils.mapChildren;
+
+public class AirspaceExtractor
+    implements AixmExtractor<List<Airspace>>
+{
+    @Language("XPath")
+    private final String xPathExpression;
+
+    public AirspaceExtractor(@NonNull @Language("XPath") String xpathExpression) {
+        this.xPathExpression = xpathExpression;
+    }
+
+    @Override
+    @org.springframework.lang.NonNull
+    public List<Airspace> extract(@org.springframework.lang.NonNull XPathDocumentExtractor docExtractor)
+        throws XPathExpressionException, TransformException
+    {
+            List<Node> nl = docExtractor.extractNodes(xPathExpression);
+
+            List<Airspace> ret = new ArrayList<>();
+            AirspaceGeometryBuilder agb = new AirspaceGeometryBuilder();
+
+            for (Node n : nl) {
+                String aseId = mapAttributes(mapChildren(n).get("AseUid")).get("mid");
+                ret.add(agb.buildAirspace(aseId, docExtractor));
+            }
+
+            return ret;
+    }
+
+    @NonNull
+    public Optional<Airspace> tryExtractOne(@NonNull XPathDocumentExtractor docExtractor)
+        throws XPathExpressionException, TransformException
+    {
+        return extract(docExtractor).stream().findFirst();
+    }
+
+    @Nullable
+    public Airspace extractOne(@NonNull XPathDocumentExtractor docExtractor)
+        throws XPathExpressionException, TransformException
+    {
+        return tryExtractOne(docExtractor).orElse(null);
+    }
+
+    @Language("XPath")
+    protected static String specialAirspacePathExpression(String type){
+        return "/AIXM-Snapshot/Ase[AseUid/codeType='%s']".formatted(type);
+    }
+
+    public static AirspaceExtractor forRestrictedAirspace(){
+        return new AirspaceExtractor(specialAirspacePathExpression("R"));
+    }
+
+    public static AirspaceExtractor forDangerousAirspace(){
+        return new AirspaceExtractor(specialAirspacePathExpression("D"));
+    }
+
+    public static AirspaceExtractor forProhibitedAirspace(){
+        return new AirspaceExtractor(specialAirspacePathExpression("P"));
+    }
+
+    public static AixmExtractor<Airspace> forAirspaceById(String airspaceId){
+        return new AirspaceExtractor("/AIXM-Snapshot/Ase[AseUid/@mid='" + airspaceId + "']")::extractOne;
+    }
+}

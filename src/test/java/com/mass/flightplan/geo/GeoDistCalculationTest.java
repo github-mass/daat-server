@@ -1,22 +1,34 @@
 package com.mass.flightplan.geo;
 
+import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.data.Percentage;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.measure.Units;
 import org.geotools.referencing.GeodeticCalculator;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.datum.DefaultEllipsoid;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.geometry.coordinate.Position;
 import org.opengis.referencing.operation.TransformException;
+import si.uom.NonSI;
 
 import javax.measure.UnitConverter;
 
+import static com.mass.flightplan.aixm.AixmUtils.latToDecimal;
+import static com.mass.flightplan.aixm.AixmUtils.lonToDecimal;
 import static java.lang.Math.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 public class GeoDistCalculationTest {
 
     @Test
+    @Disabled
     public void calculateDist()
         throws TransformException
     {
@@ -71,4 +83,73 @@ public class GeoDistCalculationTest {
         }
     }
 
+    @Test
+    void pathTest()
+        throws TransformException
+    {
+        Position p1 = new DirectPosition2D(lonToDecimal("0002324.26E"), latToDecimal("435429.17N"));
+        Position p2 = new DirectPosition2D(lonToDecimal("0002249.10E"), latToDecimal("435439.41N"));
+
+        GeodeticCalculator gc = new GeodeticCalculator();
+        gc.setStartingPosition(p1);
+        gc.setDestinationPosition(p2);
+
+        log.atInfo().addKeyValue("start", p1).addKeyValue("end", p2).log("azimuth: {}", gc.getAzimuth() + 180);
+        log.atInfo().addKeyValue("start", p1).addKeyValue("end", p2).log("distance: {}", gc.getOrthodromicDistance());
+
+        var points = gc.getGeodeticPath(1);
+
+        log.atInfo().log("Points: {}", points);
+    }
+
+    @Test
+    void circleArcTestJTS()
+        throws TransformException
+    {
+        /*
+                    <geoLat>460441.00N</geoLat>
+                    <geoLong>0044022.00E</geoLong>
+                    <codeDatum>WGE</codeDatum>
+                    <geoLatArc>454444.00N</geoLatArc>
+                    <geoLongArc>0050526.00E</geoLongArc>
+                    <valRadiusArc>26.5</valRadiusArc>
+                    <uomRadiusArc>NM</uomRadiusArc>
+
+         */
+
+        Coordinate c1 = new Coordinate(lonToDecimal("0044022.00E"), latToDecimal("460441.00N"));
+        Coordinate c2 = new Coordinate(lonToDecimal("0050526.00E"), latToDecimal("454444.00N"));
+
+        double d = JTS.orthodromicDistance(c1, c2, DefaultGeographicCRS.WGS84);
+
+        assertThat(d).isCloseTo(NonSI.NAUTICAL_MILE.getConverterTo(Units.METRE).convert(26.5), Percentage.withPercentage(1));
+    }
+
+    @Test
+    void circleArcTestGeodetic()
+        throws TransformException
+    {
+        /*
+                    <geoLat>460441.00N</geoLat>
+                    <geoLong>0044022.00E</geoLong>
+                    <codeDatum>WGE</codeDatum>
+                    <geoLatArc>454444.00N</geoLatArc>
+                    <geoLongArc>0050526.00E</geoLongArc>
+                    <valRadiusArc>26.5</valRadiusArc>
+                    <uomRadiusArc>NM</uomRadiusArc>
+
+         */
+
+        Coordinate c1 = new Coordinate(lonToDecimal("0044022.00E"), latToDecimal("460441.00N"));
+        Coordinate c2 = new Coordinate(lonToDecimal("0050526.00E"), latToDecimal("454444.00N"));
+
+        GeodeticCalculator calc = new GeodeticCalculator();
+
+        calc.setStartingPosition(new DirectPosition2D(c1.x, c1.y));
+        calc.setDestinationPosition(new DirectPosition2D(c2.x, c2.y));
+
+        double d = calc.getOrthodromicDistance();
+
+        assertThat(d).isCloseTo(NonSI.NAUTICAL_MILE.getConverterTo(Units.METRE).convert(26.5), Percentage.withPercentage(1));
+    }
 }

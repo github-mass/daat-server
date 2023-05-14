@@ -4,12 +4,11 @@ package com.mass.flightplan.vac;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.refresh.ContextRefresher;
-import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
@@ -92,7 +91,7 @@ public class SIAVersionFinder {
 
     private final PropertySource<String> dynamicPropertySource = new PropertySource<>(SIAVersionFinder.class.getName()) {
         @Override
-        public Object getProperty(String name) {
+        public Object getProperty(@NotNull String name) {
             if(EAIP_VERSION_PROPERTY_NAME.equals(name)){
                 return SIAVersionFinder.this.lastFoundVersion;
             } else {

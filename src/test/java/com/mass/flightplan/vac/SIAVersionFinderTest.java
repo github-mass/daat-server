@@ -1,26 +1,26 @@
 package com.mass.flightplan.vac;
 
-import lombok.extern.log4j.Log4j2;
+import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@EnableAutoConfiguration(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@SpringBootTest(classes = {VacUtilitiesConfiguration.class})
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, EmbeddedMongoAutoConfiguration.class, MongoAutoConfiguration.class})
 @TestPropertySource(properties = {
     "vac-atlas.e-aip-version=shalalala",
     "sia.auto-version.enabled=false",
-    "spring.cloud.refresh.enabled=true"
+    "spring.cloud.refresh.enabled=true",
 })
-@Log4j2
+@Slf4j
 @ActiveProfiles("test")
 class SIAVersionFinderTest {
 

@@ -1,29 +1,32 @@
 package com.mass.flightplan.geo;
 
 import de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.geo.Point;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@EnableAutoConfiguration(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class, EmbeddedMongoAutoConfiguration.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = GeoConfiguration.class)
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, EmbeddedMongoAutoConfiguration.class, MongoAutoConfiguration.class})
 @ActiveProfiles("test")
-@Log4j2
+@Slf4j
 @TestPropertySource(properties = {
     "logging.level.com.mass.flightplan.geo=TRACE"
 })
 class IgnAltitudeServiceTest {
 
     @Autowired AltitudeService altitudeService;
+
+    @MockBean ProximityService proximityService;
 
     @Test
     public void basicServiceTest(){
@@ -34,7 +37,7 @@ class IgnAltitudeServiceTest {
 
         var resp = altitudeService.getAltitudeAt(coord);
 
-        log.info(resp);
+        log.info("{}", resp);
 
         assertThat(resp.getValue().doubleValue()).isLessThan(0);
     }

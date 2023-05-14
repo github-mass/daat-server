@@ -1,13 +1,15 @@
 package com.mass.flightplan.geo;
 
-import com.mass.flightplan.db.HvacCrudRepository;
-import com.mass.flightplan.db.VacCrudRepository;
-import com.mass.flightplan.db.VacDataCrudRepository;
+import com.mass.flightplan.db.AerodromeRepository;
+import com.mass.flightplan.db.AirspaceRepository;
+import com.mass.flightplan.db.DatasetRepository;
+import com.mass.flightplan.db.HeliportRepository;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.ssl.SslContextBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -23,6 +25,12 @@ import javax.net.ssl.SSLException;
 @RequiredArgsConstructor
 @Import(WebClientAutoConfiguration.class)
 public class GeoConfiguration {
+
+    @Bean
+//    @ConfigurationProperties(prefix = "altitude-service")
+    public AltitudeServiceProperties altitudeServiceProperties(){
+        return new AltitudeServiceProperties();
+    }
 
     @ConditionalOnProperty(name = "altitude-service.type", havingValue = "ign")
     @Bean
@@ -50,13 +58,20 @@ public class GeoConfiguration {
     }
 
     @Bean
-    public AirportProximityService proximityService(
+    @ConfigurationProperties(prefix = "proximity-service")
+    public ProximityServiceProperties proximityServiceProperties(){
+        return new ProximityServiceProperties();
+    }
+
+    @Bean
+    public ProximityService proximityService(
+        ProximityServiceProperties properties,
         AltitudeService altitudeService,
-        VacCrudRepository vacRepository,
-        HvacCrudRepository hvacRepository,
-        VacDataCrudRepository dataRepository,
-        AirportProximityProperties properties
+        DatasetRepository datasetRepo,
+        AerodromeRepository adRepo,
+        HeliportRepository hpRepo,
+        AirspaceRepository asRepo
     ){
-        return new AirportProximityService(altitudeService, vacRepository, hvacRepository, dataRepository, properties);
+        return new ProximityService(altitudeService, datasetRepo, adRepo, hpRepo, asRepo, properties);
     }
 }

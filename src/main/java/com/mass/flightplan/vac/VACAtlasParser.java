@@ -1,14 +1,12 @@
 package com.mass.flightplan.vac;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.openjdk.nashorn.api.tree.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,17 +19,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
-@Component
+@RequiredArgsConstructor
 @Log4j2
 public class VACAtlasParser {
 
     private final VACAtlasProperties atlasProperties;
     private final RestTemplate rt;
-
-    public VACAtlasParser(@Autowired @NonNull RestTemplateBuilder builder, @NonNull VACAtlasProperties atlasProperties) {
-        this.atlasProperties = atlasProperties;
-        this.rt = builder.build();
-    }
 
     @SuppressWarnings("Duplicates")
     @NonNull
@@ -90,11 +83,7 @@ public class VACAtlasParser {
 
         Map<String, String> ret = new HashMap<>();
         for(int ii = 0; ii < airportIds.size(); ii++){
-            if(atlasProperties.getIgnoredAirports().contains(airportIds.get(ii).toString())){
-                log.info("Ignoring airport (per config): {} - {}", airportIds.get(ii), airportNames.get(ii));
-            } else {
-                ret.put(airportIds.get(ii).toString(), airportNames.get(ii).toString());
-            }
+            ret.put(airportIds.get(ii).toString(), airportNames.get(ii).toString());
         }
 
         return ret;
@@ -157,11 +146,7 @@ public class VACAtlasParser {
 
         Map<String, String> ret = new HashMap<>();
         for(int ii = 0; ii < helipadIds.size(); ii++){
-            if(atlasProperties.getIgnoredAirports().contains(helipadIds.get(ii).toString())){
-                log.info("Ignoring airport (per config): {} - {}", helipadIds.get(ii), helipadNames.get(ii));
-            } else {
-                ret.put(helipadIds.get(ii).toString(), helipadNames.get(ii).toString());
-            }
+            ret.put(helipadIds.get(ii).toString(), helipadNames.get(ii).toString());
         }
 
         return ret;

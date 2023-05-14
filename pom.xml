@@ -28,6 +28,8 @@
         <unit-ri.version>1.0.3</unit-ri.version> <!-- javax.measure (JSR363) ref implementation -->
         <bucket4j.version>0.9.0</bucket4j.version>
         <jcache.version>3.1.5</jcache.version>
+        <vtd-xml.version>2.13.4</vtd-xml.version>
+        <jetbrains-annotations.version>24.0.1</jetbrains-annotations.version>
     </properties>
 
     <dependencyManagement>
@@ -106,10 +108,18 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${jetbrains-annotations.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -123,31 +133,20 @@
             <artifactId>nashorn-core</artifactId>
             <version>${nashorn-core.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.pdfbox</groupId>-->
-<!--            <artifactId>pdfbox</artifactId>-->
-<!--            <version>${pdfbox.version}</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
             <version>${geotools.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.bytedeco</groupId>-->
-<!--            <artifactId>tesseract-platform</artifactId>-->
-<!--            <version>${tesseract-platform.version}</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>javax.measure</groupId>
             <artifactId>unit-api</artifactId>
             <version>${javax-measure-api.version}</version>
         </dependency>
         <dependency>
-            <groupId>tec.units</groupId>
-            <artifactId>unit-ri</artifactId>
-            <version>${unit-ri.version}</version>
+            <groupId>com.ximpleware</groupId>
+            <artifactId>vtd-xml</artifactId>
+            <version>${vtd-xml.version}</version>
         </dependency>
 
         <!-- TEST DEPENDENCIES -->

@@ -12,24 +12,18 @@ vac-atlas:
   airport-card-url-template: ${vac-atlas.base-url}/PDF_AIPparSSection/VAC/AD/AD-2.{code}.pdf
   helipad-card-url-template: ${vac-atlas.base-url}/PDF_AIPparSSection/VACH/AD/AD-3.{code}.pdf
 
-  ignored-airports: ['LFRJ', 'LFRL']
-  ignore-runway-extraction-errors: ['LFIP', 'LFHU', 'LFMX', 'LFNZ', 'LFTB']
-
-  pdf-extraction:
-    type: pdftotext
-    executor:
-      core-pool-size: 6
-      max-pool-size: 6
-      thread-name-prefix: pdf-conversion
-    timeout: 2m
-    keep-files: true
-    ocr-dpi: 480
+aixm:
+  import:
+    sources:
+      - "file:aixm/export_xml_bd_sia_2023-04-20-p2"
+      - "file:aixm/export_xml_bd_sia_2023-05-18-a3"
+      - "file:aixm/export_xml_bd_sia_2023-06-15-x1"
+    parse-sia-export: true
 
   update:
     enabled: true
-    cron: "0 0 4 * * *"  # 4AM every day
-    refresh-when-older-than: 1d
-    max-errors: 0
+    initial-delay: 0
+    fixed-delay: 60
 
 altitude-service:
   type: "ign"
