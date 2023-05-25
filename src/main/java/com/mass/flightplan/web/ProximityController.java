@@ -55,7 +55,7 @@ public class ProximityController {
         }
         try {
             //degrees, minutes and seconds, with decimal parts, trailing one optional, without spaces
-            lon = lon.replaceAll("\\s+", "");
+            lon = lon.replaceAll("[\\s+°'\"]", "");
             return AixmUtils.lonToDecimal(lon);
         }
         catch (NumberFormatException nfex) {
@@ -78,7 +78,7 @@ public class ProximityController {
         }
         try {
             //degrees, minutes and seconds, with decimal parts, trailing one optional, without spaces
-            lat = lat.replaceAll("\\s+", "");
+            lat = lat.replaceAll("[\\s+°'\"]", "");
             return AixmUtils.latToDecimal(lat);
         }
         catch (NumberFormatException nfex) {
