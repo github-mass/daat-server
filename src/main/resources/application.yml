@@ -47,7 +47,7 @@ logging:
     com.mass: DEBUG
 
 server:
-  port: 8077
+  port: 8080
   servlet:
     application-display-name: 'Flightplan API'
     context-path: "/"

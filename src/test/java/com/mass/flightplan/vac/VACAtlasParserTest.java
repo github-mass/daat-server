@@ -1,6 +1,7 @@
 package com.mass.flightplan.vac;
 
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,7 +24,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = VacUtilitiesConfiguration.class)
+@SpringBootTest(classes = {VacUtilitiesConfiguration.class})
 @Log4j2
 @ActiveProfiles("test")
 @Import(VacUtilitiesConfiguration.class)
@@ -33,6 +34,8 @@ class VACAtlasParserTest {
     VACAtlasParser atlasParser;
 
     @Test
+    @Disabled("Functionality no longer supported")
+    @Deprecated
     public void testVacAirportList()
         throws IOException, ExecutionException
     {
@@ -44,6 +47,8 @@ class VACAtlasParserTest {
     }
 
     @Test
+    @Disabled("Functionality no longer supported")
+    @Deprecated
     public void testVacHeliportList()
         throws IOException, ExecutionException
     {
@@ -56,6 +61,8 @@ class VACAtlasParserTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"LFIP"})
+    @Disabled("Functionality no longer supported")
+    @Deprecated
     public void testAirportCardDownload(String code)
             throws IOException
     {
@@ -77,6 +84,8 @@ class VACAtlasParserTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"LFWN"})
+    @Disabled("Functionality no longer supported")
+    @Deprecated
     public void testHeliportCardDownload(String code)
             throws IOException
     {

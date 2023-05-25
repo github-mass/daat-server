@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Log4j2
+@Deprecated
 public class VACAtlasParser {
 
     private final VACAtlasProperties atlasProperties;

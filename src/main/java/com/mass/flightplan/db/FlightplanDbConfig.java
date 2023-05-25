@@ -1,5 +1,10 @@
 package com.mass.flightplan.db;
 
+import com.mongodb.MongoClientSettings;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.mongo.MongoProperties;
+import org.springframework.boot.autoconfigure.mongo.MongoPropertiesClientSettingsBuilderCustomizer;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -14,14 +19,22 @@ import org.springframework.lang.NonNull;
 
 @Configuration
 @EnableMongoRepositories
+@EnableConfigurationProperties(MongoProperties.class)
+@RequiredArgsConstructor
 public class FlightplanDbConfig
     extends AbstractMongoClientConfiguration
 {
+    private final MongoProperties mongoProperties;
 
     @Override
     @NonNull
     protected String getDatabaseName() {
         return "flightplan";
+    }
+
+    @Override
+    protected void configureClientSettings(MongoClientSettings.Builder builder) {
+        new MongoPropertiesClientSettingsBuilderCustomizer(mongoProperties).customize(builder);
     }
 
     @Override
