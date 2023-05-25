@@ -72,6 +72,9 @@ public class ProximityResponse {
         @JsonProperty("loc")
         Point coordinates;
 
+        @JsonProperty("dist_m")
+        double distanceM;
+
         @JsonProperty("admin")
         @Nullable String admin;
 
@@ -208,14 +211,14 @@ public class ProximityResponse {
         @JsonProperty("code")
         String code;
 
-        @JsonProperty("rmrk")
+        @JsonProperty("remark")
         @Nullable
         String remark;
 
-        @JsonProperty("minFloor_m")
+        @JsonProperty("minFloor")
         String minFloor;
 
-        @JsonProperty("maxCeiling_m")
+        @JsonProperty("maxCeiling")
         String maxCeiling;
 
         @JsonProperty("frontiers")

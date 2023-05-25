@@ -95,6 +95,8 @@ public class ProximityService {
             geoCalc.setDestinationGeographicPoint(he.coordinates().getX(), he.coordinates().getY());
             double minDc = geoCalc.getOrthodromicDistance(); //metres
 
+            ph.distanceM(minDc);
+
             for (TlaEntity tla : he.takeoffLandingAreas()) {
                 var tlaBuilder = ProximityResponse.ProximateHeliportTla.builder();
 
