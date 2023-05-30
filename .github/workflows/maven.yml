@@ -51,14 +51,14 @@ jobs:
 
       - name: Tag generated images
         run: | 
-            for label in "${{ steps.meta.outputs.labels }}"; do 
-              docker tag ${{ env.IMAGE_NAME }} $label
+            for label in "${{ steps.meta.outputs.tags }}"; do 
+              docker tag ${{ env.IMAGE_NAME }} $tag
             done
         
       - name: Push images to registry
         uses: redhat-actions/push-to-registry@v2
         with: 
-          tags: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
