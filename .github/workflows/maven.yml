@@ -36,7 +36,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}    
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}   
+          sep-tags: " "
           
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -46,7 +47,18 @@ jobs:
           cache: maven
         
       - name: Build image with Maven
-        run: mvn -B spring-boot:build-image -DskipTests --file pom.xml -Dspring-boot.build-image.imageName="${{ steps.meta.outputs.tags }}" -Dspring-boot.build-image.publish=true
+        run: mvn -B spring-boot:build-image -DskipTests --file pom.xml -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
+
+      - name: Tag generated images
+        run: | 
+            for label in "${{ steps.meta.outputs.labels }}"; do 
+              docker tag ${{ env.IMAGE_NAME }} $label
+            done
+        
+      - name: Push images to registry
+        uses: redhat-actions/push-to-registry@v2
+        with: 
+          tags: ${{ steps.meta.outputs.labels }}
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
