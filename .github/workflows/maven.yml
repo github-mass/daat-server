@@ -47,18 +47,20 @@ jobs:
           cache: maven
         
       - name: Build image with Maven
+        env:
+          BP_IMAGE_LABELS: $DOCKER_METADATA_OUTPUT_LABELS
         run: mvn -B spring-boot:build-image -DskipTests --file pom.xml -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
 
       - name: Tag generated images
         run: | 
-            for label in "${{ steps.meta.outputs.tags }}"; do 
+            for tag in "$DOCKER_METADATA_OUTPUT_TAGS"; do 
               docker tag ${{ env.IMAGE_NAME }} $tag
             done
         
       - name: Push images to registry
         uses: redhat-actions/push-to-registry@v2
         with: 
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: $DOCKER_METADATA_OUTPUT_TAGS
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
