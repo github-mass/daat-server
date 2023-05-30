@@ -53,7 +53,7 @@ jobs:
 
       - name: Tag generated images
         run: | 
-            for tag in "$DOCKER_METADATA_OUTPUT_TAGS"; do 
+            for tag in $DOCKER_METADATA_OUTPUT_TAGS; do 
               docker tag ${{ env.IMAGE_NAME }} $tag
             done
         
