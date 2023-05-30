@@ -15,7 +15,7 @@
     <description></description>
 
     <properties>
-        <java.version>20</java.version>
+<!--        <java.version>17</java.version>-->
         <nashorn-core.version>15.4</nashorn-core.version>
         <geotools.version>29.1</geotools.version>
         <spring-data.version>2022.0.5</spring-data.version>

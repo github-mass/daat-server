@@ -8,7 +8,7 @@ Build Docker image by executing
 
 from the project root (use `mvnw.cmd` on Windows).
 
-It requires a running [Docker](https://www.docker.com/products/docker-desktop/) environment on the local machine and [Java 20](https://jdk.java.net/20/).
+It requires a running [Docker](https://www.docker.com/products/docker-desktop/) environment on the local machine and Java 17 or newer.
 
 ----
 
@@ -20,7 +20,7 @@ The server can also be run separately by executing
 
 from the project root (use `mvnw.cmd` on Windows). 
 
-This requires a running MongoDB instance on the local machine with the default port (`27017`), as well as [Java 20](https://jdk.java.net/20/).
+This requires a running MongoDB instance on the local machine with the default port (`27017`), as well as Java 17 or newer.
 
 __Be aware__ that a data
 import will take place on startup if that data is not yet in the DB.
