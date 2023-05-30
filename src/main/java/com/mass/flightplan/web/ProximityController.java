@@ -5,6 +5,7 @@ import com.mass.flightplan.geo.ProximityResponse;
 import com.mass.flightplan.geo.ProximityService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.MediaType;
@@ -23,6 +24,7 @@ public class ProximityController {
 
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
+    @Cacheable(cacheNames = "proximity-info", condition = "@cacheConfig['proximity-info'].enabled")
     public ResponseEntity<?> getProximityInfo(@RequestParam("lon") String longitude, @RequestParam("lat") String latitude) {
         try {
             double dLon = lonToDecimal(longitude);
@@ -38,6 +40,7 @@ public class ProximityController {
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
+    @Cacheable(cacheNames = "proximity-info", condition = "@cacheConfig['proximity-info'].enabled")
     public ProximityResponse postProximityInfo(@RequestBody GeoJsonPoint location){
         return service.computeFor(location);
     }

@@ -34,13 +34,21 @@ spring:
   cloud:
     refresh:
       enabled: true
-  cache:
-    jcache:
-      provider: com.github.benmanes.caffeine.jcache.spi.CaffeineCachingProvider
-    cache-names:
-      - rate-limit-buckets
-    caffeine:
-      spec: maximumSize=10000,expireAfterAccess=1h
+
+cache:
+  rate-limit-buckets:
+    enabled: true
+    maximum-size: 10000
+
+  altitude:
+    enabled: true
+    maximum-size: 10000
+    expire-after-access: "10m"
+
+  proximity-info:
+    enabled: true
+    maximum-size: 500
+    expire-after-access: "10m"
 
 logging:
   level:
@@ -56,7 +64,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: "metrics, health, caches"
+        include: "*"
+    jmx:
+      exposure:
+        include: "health, beans, mappings"
   endpoint:
     metrics:
       enabled: true
@@ -64,17 +75,20 @@ management:
       enabled: true
     caches:
       enabled: true
+    beans:
+      enabled: true
+    mappings:
+      enabled: true
 
 bucket4j:
   enabled: true
-  cache-to-use: jcache
   filters:
     - cache-name: rate-limit-buckets
       url: .*/api.*/proximity.*
       rate-limits:
         - cache-key: getRemoteAddr()
           bandwidths:
-            - capacity: 6
+            - capacity: 12
               time: 1
               unit: minutes
       metrics:
