@@ -11,8 +11,9 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.lang.Nullable;
 import si.uom.SI;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.util.Optional;
 
@@ -45,8 +46,8 @@ public class TlaEntity {
     @Getter(NONE)
     Double elevationFt;
 
-    public Optional<Length> elevation() {
-        return Optional.ofNullable(elevationFt).map(d -> new LengthAmount(d, Units.FOOT));
+    public Optional<Quantity<Length>> elevation() {
+        return Optional.ofNullable(elevationFt).map(d -> Quantities.getQuantity(d, Units.FOOT));
     }
 
     @Nullable
@@ -59,12 +60,12 @@ public class TlaEntity {
     @Getter(NONE)
     Double lengthM;
 
-    public Optional<Length> width() {
-        return Optional.ofNullable(widthM).map(d -> new LengthAmount(d, Units.METRE));
+    public Optional<Quantity<Length>> width() {
+        return Optional.ofNullable(widthM).map(d -> Quantities.getQuantity(d, Units.METRE));
     }
 
-    public Optional<Length> length() {
-        return Optional.ofNullable(lengthM).map(d -> new LengthAmount(d, Units.METRE));
+    public Optional<Quantity<Length>> length() {
+        return Optional.ofNullable(lengthM).map(d -> Quantities.getQuantity(d, Units.METRE));
     }
 
     @Nullable

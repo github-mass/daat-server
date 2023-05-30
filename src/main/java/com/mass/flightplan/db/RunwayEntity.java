@@ -8,8 +8,9 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.lang.Nullable;
 import si.uom.SI;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.util.Optional;
 
@@ -45,12 +46,12 @@ public class RunwayEntity {
     @Field("widthM")
     double widthMetres;
 
-    public Length length(){
-        return new LengthAmount(lengthMetres, SI.METRE);
+    public Quantity<Length> length(){
+        return Quantities.getQuantity(lengthMetres, SI.METRE);
     }
 
-    public Length width(){
-        return new LengthAmount(widthMetres, SI.METRE);
+    public Quantity<Length> width(){
+        return Quantities.getQuantity(widthMetres, SI.METRE);
     }
 
     @Field("comp")
@@ -67,12 +68,12 @@ public class RunwayEntity {
     @Field("maxElevFt")
     Double maxElevationFt;
 
-    public Optional<Length> minElevation(){
-        return Optional.ofNullable(minElevationFt).map(d -> new LengthAmount(d, Units.FOOT));
+    public Optional<Quantity<Length>> minElevation(){
+        return Optional.ofNullable(minElevationFt).map(d -> Quantities.getQuantity(d, Units.FOOT));
     }
 
-    public Optional<Length> maxElevation(){
-        return Optional.ofNullable(maxElevationFt).map(d -> new LengthAmount(d, Units.FOOT));
+    public Optional<Quantity<Length>> maxElevation(){
+        return Optional.ofNullable(maxElevationFt).map(d -> Quantities.getQuantity(d, Units.FOOT));
     }
 
     @Field("paved")

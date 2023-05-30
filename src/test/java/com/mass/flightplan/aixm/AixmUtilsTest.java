@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 import tech.units.indriya.unit.Units;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.util.stream.Stream;
 
@@ -17,7 +18,7 @@ class AixmUtilsTest {
 
     @Test
     void testFlightLevel(){
-        Length ln = new LengthAmount(80, AixmUtils.parseLengthUnit("FL_STD"));
+        Quantity<Length> ln = Quantities.getQuantity(80, AixmUtils.parseLengthUnit("FL_STD"));
         assertThat(ln.to(Units.METRE).getValue().doubleValue()).isCloseTo(80 * 30.48, Offset.offset(1d));
         assertThat(ln.toString()).isEqualTo("80 FL_STD");
         System.out.println(ln);

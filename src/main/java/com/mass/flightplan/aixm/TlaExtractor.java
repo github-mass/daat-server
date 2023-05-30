@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.NonNull;
 import org.w3c.dom.Node;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.util.ArrayList;
@@ -63,16 +63,16 @@ public class TlaExtractor
 
             if (m.containsKey("valElev")) {
                 var elevUnit = parseLengthUnit(m.get("uomDistVer").getTextContent());
-                var elev = new LengthAmount(Double.parseDouble(m.get("valElev").getTextContent()), elevUnit);
+                var elev = Quantities.getQuantity(Double.parseDouble(m.get("valElev").getTextContent()), elevUnit);
                 b.elevation(elev);
             }
 
             if (m.containsKey("valLen")) {
                 var dimUnit = parseLengthUnit(m.get("uomDim").getTextContent());
-                var len = new LengthAmount(Double.parseDouble(m.get("valLen").getTextContent()), dimUnit);
+                var len = Quantities.getQuantity(Double.parseDouble(m.get("valLen").getTextContent()), dimUnit);
                 var wid = len;
                 if (m.containsKey("valWid")) {
-                    wid = new LengthAmount(Double.parseDouble(m.get("valWid").getTextContent()), dimUnit);
+                    wid = Quantities.getQuantity(Double.parseDouble(m.get("valWid").getTextContent()), dimUnit);
                 }
 
                 b.length(len).width(wid);

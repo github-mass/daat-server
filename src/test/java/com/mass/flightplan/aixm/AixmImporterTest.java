@@ -4,14 +4,14 @@ import com.mass.flightplan.geo.AltitudeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
 import si.uom.SI;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AixmImporterTest {
 
 
-    final AltitudeService altitudeService = coordinate -> new LengthAmount(69, SI.METRE);
+    final AltitudeService altitudeService = coordinate -> Quantities.getQuantity(69, SI.METRE);
 
     @Test
     void perform()

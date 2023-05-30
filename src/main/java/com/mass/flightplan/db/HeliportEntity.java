@@ -13,8 +13,9 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.lang.Nullable;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.math.BigInteger;
 import java.time.Year;
@@ -65,8 +66,8 @@ public class HeliportEntity {
     @Field("elevFt")
     double elevationFt;
 
-    public Length elevation() {
-        return new LengthAmount(elevationFt, Units.FOOT);
+    public Quantity<Length> elevation() {
+        return Quantities.getQuantity(elevationFt, Units.FOOT);
     }
 
     @Getter(AccessLevel.NONE)
@@ -74,8 +75,8 @@ public class HeliportEntity {
     @Field("geoidUndFt")
     Double geoidUndulationFt;
 
-    public Optional<Length> geoidUndulation() {
-        return Optional.ofNullable(geoidUndulationFt).map(d -> new LengthAmount(d, Units.FOOT));
+    public Optional<Quantity<Length>> geoidUndulation() {
+        return Optional.ofNullable(geoidUndulationFt).map(d -> Quantities.getQuantity(d, Units.FOOT));
     }
 
     @Nullable

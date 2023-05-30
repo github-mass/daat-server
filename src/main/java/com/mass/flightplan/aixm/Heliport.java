@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.Nullable;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.time.Year;
 import java.util.List;
@@ -26,10 +27,10 @@ public class Heliport {
 
     @NonNull Point coordinates;
 
-    @NonNull Length elevation;
+    @NonNull Quantity<Length> elevation;
 
     @Nullable
-    Length geoidUndulation;
+    Quantity<Length> geoidUndulation;
 
     @Nullable
     Double magVar;

@@ -11,8 +11,9 @@ import org.slf4j.event.Level;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.NonNull;
 import org.w3c.dom.Node;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import javax.xml.xpath.XPathExpressionException;
 import java.awt.geom.Point2D;
@@ -74,8 +75,8 @@ public class RunwayExtractor
             var designation = mapChildren(m.get("RwyUid")).get("txtDesig").getTextContent();
 
             var sizeUnit = parseLengthUnit(m.get("uomDimRwy").getTextContent());
-            Length length = new LengthAmount(Double.parseDouble(m.get("valLen").getTextContent()), sizeUnit);
-            Length width = new LengthAmount(Double.parseDouble(m.get("valWid").getTextContent()), sizeUnit);
+            Quantity<Length> length = Quantities.getQuantity(Double.parseDouble(m.get("valLen").getTextContent()), sizeUnit);
+            Quantity<Length> width = Quantities.getQuantity(Double.parseDouble(m.get("valWid").getTextContent()), sizeUnit);
 
             var composition = Optional.ofNullable(m.get("codeComposition")).map(Node::getTextContent).orElse(null);
 
@@ -117,11 +118,11 @@ public class RunwayExtractor
         </Rcp>
          */
 
-        Stream<Length> rwyAlts = nl.stream()
+        Stream<Quantity<Length>> rwyAlts = nl.stream()
                                    .filter(n -> n.getNodeType() == Node.ELEMENT_NODE)
                                    .map(AixmUtils::mapChildren)
                                    .filter(m -> m.containsKey("valElev"))
-                                   .map(m -> new LengthAmount(Double.parseDouble(m.get("valElev").getTextContent()), AixmUtils.parseLengthUnit(m.get("uomDistVer").getTextContent())));
+                                   .map(m -> Quantities.getQuantity(Double.parseDouble(m.get("valElev").getTextContent()), AixmUtils.parseLengthUnit(m.get("uomDistVer").getTextContent())));
 
         DoubleSummaryStatistics dss = new DoubleSummaryStatistics();
         rwyAlts.mapToDouble(l -> l.to(Units.METRE).getValue().doubleValue()).forEach(dss);
@@ -130,7 +131,7 @@ public class RunwayExtractor
             log.debug("No RunwayCentrePositions found for runway {}", runwayId);
         }
         else {
-            builder.minElevation(new LengthAmount(dss.getMin(), Units.METRE)).maxElevation(new LengthAmount(dss.getMax(), Units.METRE));
+            builder.minElevation(Quantities.getQuantity(dss.getMin(), Units.METRE)).maxElevation(Quantities.getQuantity(dss.getMax(), Units.METRE));
         }
     }
 

@@ -7,6 +7,7 @@ import lombok.Value;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.Nullable;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 @Value
@@ -14,9 +15,9 @@ import javax.measure.quantity.Length;
 public class TakeOffLandingArea {
     @NonNull String designation;
     @NonNull Point coordinates;
-    @Nullable Length elevation;
-    @Nullable Length width;
-    @Nullable Length length;
+    @Nullable Quantity<Length> elevation;
+    @Nullable Quantity<Length> width;
+    @Nullable Quantity<Length> length;
     @Nullable String composition;
     @Nullable String remark;
 

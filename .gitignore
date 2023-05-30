@@ -32,3 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 /mongodb-data/
+
+### Maven backup files ###
+*.versionsBackup

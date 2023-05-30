@@ -9,6 +9,7 @@ import lombok.Value;
 import org.locationtech.jts.geom.Geometry;
 import org.springframework.lang.Nullable;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.util.List;
 
@@ -21,10 +22,10 @@ public class Airspace {
     @NonNull String name;
     @Nullable String remarks;
 
-    @NonNull Length minFloor;
-    @NonNull Length maxFloor;
-    @NonNull Length minCeiling;
-    @NonNull Length maxCeiling;
+    @NonNull Quantity<Length> minFloor;
+    @NonNull Quantity<Length> maxFloor;
+    @NonNull Quantity<Length> minCeiling;
+    @NonNull Quantity<Length> maxCeiling;
 
     @Singular
     List<String> frontiers;
@@ -33,7 +34,7 @@ public class Airspace {
 
     public static class AirspaceBuilder {
 
-        public AirspaceBuilder adjustCeiling(Length ceiling){
+        public AirspaceBuilder adjustCeiling(Quantity<Length> ceiling){
             if(maxCeiling == null || ((Comparable<Object>)ceiling).compareTo(maxCeiling) > 0){
                 maxCeiling = ceiling;
             }
@@ -44,7 +45,7 @@ public class Airspace {
             return this;
         }
 
-        public AirspaceBuilder adjustFloor(Length floor){
+        public AirspaceBuilder adjustFloor(Quantity<Length> floor){
             if(maxFloor == null || ((Comparable<Object>)floor).compareTo(maxFloor) > 0){
                 maxFloor = floor;
             }

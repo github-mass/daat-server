@@ -10,8 +10,9 @@ import org.slf4j.event.Level;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.NonNull;
 import org.w3c.dom.Node;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import javax.xml.xpath.XPathExpressionException;
 import java.time.Year;
@@ -113,7 +114,7 @@ public class AerodromesExtractor
         ));
 
         if(nm.containsKey("valElev")) {
-            builder.elevation(new LengthAmount(
+            builder.elevation(Quantities.getQuantity(
                 parseDouble(nm.get("valElev").getTextContent()),
                 parseLengthUnit(nm.get("uomDistVer").getTextContent())
             ));
@@ -121,7 +122,7 @@ public class AerodromesExtractor
         else {
             log.atLevel(Level.INFO).addKeyValue("adId", adId).addKeyValue("code", code).log("No elevation specified, will attempt resolution");
             try {
-                Length alt = altitudeService.getAltitudeAt(loc);
+                Quantity<Length> alt = altitudeService.getAltitudeAt(loc);
                 builder.elevation(alt);
             }
             catch (Exception x) {
@@ -130,7 +131,7 @@ public class AerodromesExtractor
         }
 
         if (nm.containsKey("valGeoidUndulation")) {
-            builder.geoidUndulation(new LengthAmount(
+            builder.geoidUndulation(Quantities.getQuantity(
                 parseDouble(nm.get("valGeoidUndulation").getTextContent()),
                 parseLengthUnit(nm.get("uomDistVer").getTextContent())
             ));

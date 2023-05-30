@@ -7,7 +7,7 @@ import org.intellij.lang.annotations.Language;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.NonNull;
 import org.w3c.dom.Node;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.time.Year;
@@ -100,12 +100,12 @@ public class HeliportsExtractor
             lonToDecimal(nm.get("geoLong").getTextContent()),
             latToDecimal(nm.get("geoLat").getTextContent())
         ));
-        builder.elevation(new LengthAmount(
+        builder.elevation(Quantities.getQuantity(
             parseDouble(nm.get("valElev").getTextContent()),
             parseLengthUnit(nm.get("uomDistVer").getTextContent())
         ));
         if(nm.containsKey("valGeoidUndulation")) {
-            builder.geoidUndulation(new LengthAmount(
+            builder.geoidUndulation(Quantities.getQuantity(
                 parseDouble(nm.get("valGeoidUndulation").getTextContent()),
                 parseLengthUnit(nm.get("uomDistVer").getTextContent())
             ));

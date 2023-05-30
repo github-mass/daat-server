@@ -3,7 +3,6 @@ package com.mass.flightplan.db;
 import com.mass.flightplan.aixm.Aerodrome;
 import com.mass.flightplan.aixm.Runway;
 import lombok.*;
-import org.geotools.measure.Units;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.geo.Point;
@@ -14,8 +13,8 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.lang.Nullable;
-import si.uom.quantity.impl.LengthAmount;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.math.BigInteger;
 import java.time.Year;
@@ -23,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.geotools.measure.Units.FOOT;
+import static tech.units.indriya.quantity.Quantities.getQuantity;
 
 @Document(collection = "aerodromes")
 @Value
@@ -35,8 +37,8 @@ public class AerodromeEntity {
             ae.code(), ae.name(),
             ae.servedCity(), ae.siteDescription(), ae.adminAuthority(),
             ae.coordinates(),
-            ae.elevation().to(Units.FOOT).getValue().doubleValue(),
-            Optional.ofNullable(ae.geoidUndulation()).map(q -> q.to(Units.FOOT).getValue().doubleValue()).orElse(null),
+            ae.elevation().to(FOOT).getValue().doubleValue(),
+            Optional.ofNullable(ae.geoidUndulation()).map(q -> q.to(FOOT).getValue().doubleValue()).orElse(null),
             ae.magVar(), Optional.ofNullable(ae.magVarUpdated()).map(Year::getValue).orElse(null),
             ae.runways().stream().map(Runway::toEntity).collect(Collectors.toList()),
             ae.contactInfos(),
@@ -82,8 +84,8 @@ public class AerodromeEntity {
     @Getter(AccessLevel.NONE)
     double elevationFt;
 
-    public Length elevation(){
-        return new LengthAmount(elevationFt, Units.FOOT);
+    public Quantity<Length> elevation(){
+        return getQuantity(elevationFt, FOOT);
     }
 
     @Nullable
@@ -91,8 +93,8 @@ public class AerodromeEntity {
     @Getter(AccessLevel.NONE)
     Double geoidUndulationFt;
 
-    public Optional<Length> geoidUndulation(){
-        return Optional.ofNullable(geoidUndulationFt).map(v -> new LengthAmount(v, Units.FOOT));
+    public Optional<Quantity<Length>> geoidUndulation(){
+        return Optional.ofNullable(geoidUndulationFt).map(v -> getQuantity(v, FOOT));
     }
 
     @Nullable

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.geo.Point;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ public class CachingAltitudeService
 
     @Override
     @Cacheable("altitude")
-    public Length getAltitudeAt(Point coordinate) {
+    public Quantity<Length> getAltitudeAt(Point coordinate) {
         return delegate.getAltitudeAt(coordinate);
     }
 }

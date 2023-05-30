@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.operation.TransformException;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.awt.*;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class ExtractorsTest {
 
-    AltitudeService altitudeService = x -> new LengthAmount(69, Units.FOOT);
+    AltitudeService altitudeService = x -> Quantities.getQuantity(69, Units.FOOT);
 
     private XPathDocumentExtractor dex;
 

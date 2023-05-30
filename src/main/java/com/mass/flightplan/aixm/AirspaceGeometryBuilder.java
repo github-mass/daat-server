@@ -21,8 +21,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Node;
 import si.uom.SI;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Length;
 import javax.xml.xpath.XPathExpressionException;
@@ -184,11 +185,11 @@ public class AirspaceGeometryBuilder {
             We're using custom units here (see AixmUtils), since we have to handle
             ft (height), ft (altitude) and Flight Level.
          */
-        Length floor = new LengthAmount(
+        Quantity<Length> floor = Quantities.getQuantity(
             parseDouble(nodeMap.get("valDistVerLower").getTextContent()),
             parseLengthUnit(nodeMap.get("uomDistVerLower").getTextContent() + "_" + nodeMap.get("codeDistVerLower").getTextContent())
         );
-        Length ceiling = new LengthAmount(
+        Quantity<Length> ceiling = Quantities.getQuantity(
             parseDouble(nodeMap.get("valDistVerUpper").getTextContent()),
             parseLengthUnit(nodeMap.get("uomDistVerUpper").getTextContent() + "_" + nodeMap.get("codeDistVerUpper").getTextContent())
         );
@@ -334,7 +335,7 @@ public class AirspaceGeometryBuilder {
             double radius = parseDouble(circleNode.get("valRadius").getTextContent());
             Unit<Length> unit = parseLengthUnit(circleNode.get("uomRadius").getTextContent());
 
-            Polygon geom = (Polygon) bufferPoint(new LengthAmount(radius, unit), DefaultGeographicCRS.WGS84, p);
+            Polygon geom = (Polygon) bufferPoint(Quantities.getQuantity(radius, unit), DefaultGeographicCRS.WGS84, p);
 
             return geom;
         }
@@ -400,7 +401,7 @@ public class AirspaceGeometryBuilder {
                                 lonToDecimal(prevMap.get("geoLongArc").getTextContent()),
                                 latToDecimal(prevMap.get("geoLatArc").getTextContent())
                             );
-                            Length arcRadius = new LengthAmount(
+                            Quantity<Length> arcRadius = Quantities.getQuantity(
                                 parseDouble(prevMap.get("valRadiusArc").getTextContent()),
                                 parseLengthUnit(prevMap.get("uomRadiusArc").getTextContent())
                             );
@@ -523,7 +524,7 @@ public class AirspaceGeometryBuilder {
     }
 
     // https://stackoverflow.com/questions/44249945/how-to-use-geometricshapefactory-in-geotools-to-create-a-circle-on-map#
-    private static Geometry bufferPoint(Length distance, CoordinateReferenceSystem origCRS, Geometry geom) {
+    private static Geometry bufferPoint(Quantity<Length> distance, CoordinateReferenceSystem origCRS, Geometry geom) {
         Geometry pGeom = geom;
         MathTransform toTransform, fromTransform = null;
         // reproject the geometry to a local projection

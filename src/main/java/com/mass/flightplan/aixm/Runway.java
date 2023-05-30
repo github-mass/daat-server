@@ -7,6 +7,7 @@ import lombok.Value;
 import org.springframework.data.geo.Point;
 import org.springframework.lang.Nullable;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 @Value
@@ -20,19 +21,19 @@ public class Runway {
     Point coordinates;
 
     @NonNull
-    Length length;
+    Quantity<Length> length;
 
     @NonNull
-    Length width;
+    Quantity<Length> width;
 
     @Nullable
     String surface;
 
     @Nullable
-    Length minElevation;
+    Quantity<Length> minElevation;
 
     @Nullable
-    Length maxElevation;
+    Quantity<Length> maxElevation;
 
     boolean paved;
 

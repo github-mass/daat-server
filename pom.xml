@@ -5,30 +5,29 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.5</version>
+        <version>3.0.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.mass</groupId>
-    <artifactId>flightplan</artifactId>
+    <artifactId>flightplan-server</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>FlightPlan Server</name>
     <description></description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>20</java.version>
         <nashorn-core.version>15.4</nashorn-core.version>
-        <geotools.version>27.2</geotools.version>
+        <geotools.version>29.1</geotools.version>
         <spring-data.version>2022.0.5</spring-data.version>
-        <jsoup.version>1.15.4</jsoup.version>
-        <spring-cloud.version>2022.0.1</spring-cloud.version>
+        <jsoup.version>1.16.1</jsoup.version>
+        <spring-cloud.version>2022.0.3</spring-cloud.version>
         <embed-mongo.version>4.6.1</embed-mongo.version>
-        <javax-measure-api.version>2.1.3</javax-measure-api.version>
-        <unit-ri.version>1.0.3</unit-ri.version> <!-- javax.measure (JSR363) ref implementation -->
+        <javax-measure-api.version>2.2</javax-measure-api.version>
         <bucket4j-spring-boot-starter.version>0.9.0</bucket4j-spring-boot-starter.version>
-        <jcache.version>3.1.5</jcache.version>
+        <bucket4j.version>8.3.0</bucket4j.version>
+        <jcache.version>3.1.6</jcache.version>
         <vtd-xml.version>2.13.4</vtd-xml.version>
         <jetbrains-annotations.version>24.0.1</jetbrains-annotations.version>
-        <bucket4j.version>8.2.0</bucket4j.version>
     </properties>
 
     <dependencyManagement>

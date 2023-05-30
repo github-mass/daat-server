@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import org.springframework.lang.NonNull;
 import si.uom.SI;
 
+import javax.measure.Quantity;
 import javax.measure.UnitConverter;
 import javax.measure.quantity.Length;
 import java.math.BigInteger;
@@ -61,7 +62,7 @@ public class ProximityService {
 
         var responseBuilder = ProximityResponse.builder().location(queryLocation);
 
-        Length alt = altitudeService.getAltitudeAt(queryLocation);
+        Quantity<Length> alt = altitudeService.getAltitudeAt(queryLocation);
 
         responseBuilder.altitudeM(alt.to(Units.METRE).getValue().doubleValue());
 

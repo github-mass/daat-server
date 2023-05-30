@@ -6,8 +6,9 @@ import lombok.extern.log4j.Log4j2;
 import org.geotools.measure.Units;
 import org.springframework.data.geo.Point;
 import org.springframework.web.reactive.function.client.WebClient;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 import java.util.List;
 
@@ -21,12 +22,12 @@ public class IgnAltitudeService
     private final @NonNull AltitudeServiceProperties.IgnServiceProperties properties;
 
     @Override
-    public Length getAltitudeAt(Point coordinate)
+    public Quantity<Length> getAltitudeAt(Point coordinate)
     {
         try {
             var alt = queryAltitude(coordinate);
 
-            return new LengthAmount(alt.z(), Units.METRE);
+            return Quantities.getQuantity(alt.z(), Units.METRE);
         }
         catch (RuntimeException rcex) {
             throw new IllegalStateException(

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.ActiveProfiles;
 import si.uom.SI;
-import si.uom.quantity.impl.LengthAmount;
+import tech.units.indriya.quantity.Quantities;
 
 @DataMongoTest
 @Slf4j
@@ -29,7 +29,7 @@ public class AixmDbImportTest {
     {
         log.info("Preparing data...");
 
-        AltitudeService altitudeService = coordinate -> new LengthAmount(69, SI.METRE);
+        AltitudeService altitudeService = coordinate -> Quantities.getQuantity(69, SI.METRE);
         AixmImporter imp = AixmImporter.builder()
                                        .source(new FileSystemResource("./aixm/export_xml_bd_sia_2023-04-20-p2"))
                                        .parseSiaExport(true)
