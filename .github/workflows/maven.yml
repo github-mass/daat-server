@@ -47,9 +47,7 @@ jobs:
           cache: maven
 
       - name: Prepare image labels
-        run: |
-          echo "BP_IMAGE_LABELS="$(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ') >> "$GITHUB_ENV"
-          echo "Created labels: ${BP_IMAGE_LABELS}" >> $GITHUB_STEP_SUMMARY
+        run: echo "BP_IMAGE_LABELS="$(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ') >> "$GITHUB_ENV"
 
       - name: Build image with Maven
         run: |
