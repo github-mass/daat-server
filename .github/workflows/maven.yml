@@ -34,7 +34,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}   
           sep-tags: " "
@@ -45,12 +45,15 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
           cache: maven
-        
-      - name: Build image with Maven
-        env:
-          BP_IMAGE_LABELS: $(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ')
+
+      - name: Prepare image labels
         run: |
-          echo "Using labels:" ${BP_IMAGE_LABELS}
+          echo "BP_IMAGE_LABELS="$(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ') >> "$GITHUB_ENV"
+          echo "Created labels: ${BP_IMAGE_LABELS}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Build image with Maven
+        run: |
+          echo "Using labels:" ${{ env.BP_IMAGE_LABELS }}
           mvn -ntp -B -P github-workflow -DskipTests --file pom.xml spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
 
       - name: Tag and push images
@@ -59,6 +62,8 @@ jobs:
               docker tag ${{ env.IMAGE_NAME }} $tag
               docker push $tag
             done
+            
+            echo "Pushed images: ${DOCKER_METADATA_OUTPUT_TAGS}" >> $GITHUB_STEP_SUMMARY
         
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
