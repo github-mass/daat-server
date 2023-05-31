@@ -51,7 +51,7 @@ jobs:
           BP_IMAGE_LABELS: $(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ')
         run: |
           echo "Using labels:" ${BP_IMAGE_LABELS}
-          mvn -ntp -B spring-boot:build-image -DskipTests --file pom.xml -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
+          mvn -ntp -B -P github-workflow -DskipTests --file pom.xml spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
 
       - name: Tag and push images
         run: | 
