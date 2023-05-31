@@ -11,7 +11,7 @@
     <groupId>com.mass</groupId>
     <artifactId>flightplan-server</artifactId>
     <version>1.0.0</version>
-    <name>FlightPlan Server</name>
+    <name>Flightplan Server</name>
     <description></description>
 
     <properties>
@@ -216,14 +216,44 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <image>
-                        <env>
-                            <BP_IMAGE_LABELS>${env.BP_IMAGE_LABELS}</BP_IMAGE_LABELS>
-                        </env>
-                    </image>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>github-workflow</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
+                            <image>
+                                <env>
+                                    <!--
+                                        Forward the BP_IMAGE_LABELS env property to paketo builder.
+                                        We don't do this in the default profile, as it would yield an
+                                        error if the property isn't defined.
+                                    -->
+                                    <BP_IMAGE_LABELS>${env.BP_IMAGE_LABELS}</BP_IMAGE_LABELS>
+                                </env>
+                            </image>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

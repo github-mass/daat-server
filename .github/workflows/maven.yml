@@ -47,8 +47,9 @@ jobs:
           cache: maven
         
       - name: Build image with Maven
+        env:
+          BP_IMAGE_LABELS: $(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ')
         run: |
-          BP_IMAGE_LABELS=$(echo "$DOCKER_METADATA_OUTPUT_LABELS" | sed 's/\([^=]\+=\)\(.*\)/\1"\2"/' | tr '\n' ' ')
           echo "Using labels:" ${BP_IMAGE_LABELS}
           mvn -ntp -B spring-boot:build-image -DskipTests --file pom.xml -Dspring-boot.build-image.imageName=${{ env.IMAGE_NAME }}
 
