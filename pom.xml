@@ -12,7 +12,7 @@
     <artifactId>flightplan-server</artifactId>
     <version>1.0.0</version>
     <name>Flightplan Server</name>
-    <description></description>
+    <description>Backend for the Flightplan app</description>
 
     <properties>
 <!--        <java.version>17</java.version>-->
@@ -28,8 +28,6 @@
         <jcache.version>3.1.6</jcache.version>
         <vtd-xml.version>2.13.4</vtd-xml.version>
         <jetbrains-annotations.version>24.0.1</jetbrains-annotations.version>
-
-        <docker-image-additional-labels></docker-image-additional-labels>
     </properties>
 
     <dependencyManagement>
