@@ -28,6 +28,8 @@
         <jcache.version>3.1.6</jcache.version>
         <vtd-xml.version>2.13.4</vtd-xml.version>
         <jetbrains-annotations.version>24.0.1</jetbrains-annotations.version>
+
+        <docker-image-additional-labels></docker-image-additional-labels>
     </properties>
 
     <dependencyManagement>
@@ -214,6 +216,11 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <image>
+                        <env>
+                            <BP_IMAGE_LABELS>${docker-image-additional-labels}</BP_IMAGE_LABELS>
+                        </env>
+                    </image>
                 </configuration>
             </plugin>
         </plugins>
