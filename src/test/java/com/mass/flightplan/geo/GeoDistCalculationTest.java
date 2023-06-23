@@ -193,6 +193,9 @@ public class GeoDistCalculationTest {
         );
     }
 
+    static double azimuthToBearing(double az){
+        return az < 0 ? az + 360 : az;
+    }
 
     static double azimuthRelativeToRunway(Point2D location, Point2D runway, double runwayBearing, GeodeticCalculator calc)
     {
@@ -207,4 +210,36 @@ public class GeoDistCalculationTest {
         return relAz;
     }
 
+    @Test
+    @Disabled
+    void triangulationTest()
+    {
+        Point2D rwy = new Point2D.Double(2.395576, 48.726238);
+        Point2D loc1 = new Point2D.Double(2.494509, 48.748239);
+        Point2D loc2 = new Point2D.Double(2.393799, 48.714783);
+        Point2D loc3 = new Point2D.Double(2.360504, 48.721619);
+
+        final GeodeticCalculator geoCalc = new GeodeticCalculator();
+        final UnitConverter degreesToRadians = Units.DEGREE_ANGLE.getConverterTo(Units.RADIAN);
+
+        geoCalc.setStartingGeographicPoint(rwy);
+        geoCalc.setDestinationGeographicPoint(loc1);
+        double distToLocation = geoCalc.getOrthodromicDistance();
+
+        double rwyBrg = 250;
+
+//        double deg_A = rwyBrg - azimuthToBearing(geoCalc.getAzimuth());
+//        double A = degreesToRadians.convert(deg_A);
+
+        double qte = azimuthRelativeToRunway(loc1, rwy, rwyBrg, geoCalc);
+        double A = abs(degreesToRadians.convert(qte));
+
+        double c = distToLocation / DefaultEllipsoid.WGS84.getSemiMajorAxis();
+
+        double a = asin(sin(A) * sin(c)) * DefaultEllipsoid.WGS84.getSemiMajorAxis();
+        double b = atan(cos(A) * tan(c)) * DefaultEllipsoid.WGS84.getSemiMajorAxis();
+
+        System.out.printf("DtA: %f%n", a);
+        System.out.printf("DoA: %f%n", b);
+    }
 }
