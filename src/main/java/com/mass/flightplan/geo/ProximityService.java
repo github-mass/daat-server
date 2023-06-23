@@ -227,6 +227,7 @@ public class ProximityService {
                     continue;
                 }
 
+                geoCalc.setStartingGeographicPoint(queryLocation.getX(), queryLocation.getY());
                 geoCalc.setDestinationGeographicPoint(rwyCoord.getX(), rwyCoord.getY());
                 double distToLocation = geoCalc.getOrthodromicDistance();
 
