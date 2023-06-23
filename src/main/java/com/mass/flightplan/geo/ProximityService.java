@@ -227,11 +227,22 @@ public class ProximityService {
                     continue;
                 }
 
-                geoCalc.setStartingGeographicPoint(queryLocation.getX(), queryLocation.getY());
-                geoCalc.setDestinationGeographicPoint(rwyCoord.getX(), rwyCoord.getY());
+                geoCalc.setStartingGeographicPoint(rwyCoord.getX(), rwyCoord.getY());
+                geoCalc.setDestinationGeographicPoint(queryLocation.getX(), queryLocation.getY());
                 double distToLocation = geoCalc.getOrthodromicDistance();
 
-                double A = abs(degreesToRadians.convert(rwyBrg));
+                /*
+                    Bearing of query location relative to runway axis.
+
+                    Careful, this affects coordinates in GeodeticCalculator.
+                 */
+                double qte = azimuthRelativeToRunway(
+                        new Point2D.Double(queryLocation.getX(), queryLocation.getY()),
+                        new Point2D.Double(rwyCoord.getX(), rwyCoord.getY()),
+                        rwyBrg, geoCalc
+                    );
+
+                double A = abs(degreesToRadians.convert(qte));
                 double c = distToLocation / DefaultEllipsoid.WGS84.getSemiMajorAxis();
 
                 double a = asin(sin(A) * sin(c)) * DefaultEllipsoid.WGS84.getSemiMajorAxis();
@@ -249,19 +260,9 @@ public class ProximityService {
                                                           .coordinates(rwyCoord);
 
                 pr.distToAxisM(abs(a)).distOnAxisM(abs(b));
+                pr.azimuthToQuery(qte);
 
                 minDa = min(minDa, abs(a));
-
-                /*
-                    Bearing of query location relative to runway axis
-                 */
-                pr.azimuthToQuery(
-                    azimuthRelativeToRunway(
-                        new Point2D.Double(queryLocation.getX(), queryLocation.getY()),
-                        new Point2D.Double(rwyCoord.getX(), rwyCoord.getY()),
-                        rwyBrg, geoCalc
-                    )
-                );
 
                 pa.runway(pr.build());
             }
