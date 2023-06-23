@@ -75,6 +75,12 @@ public class ProximityResponse {
         @JsonProperty("dist_m")
         double distanceM;
 
+        /**
+         * True bearing from query to aerodrome.
+         */
+        @JsonProperty("quj")
+        double quj;
+
         @JsonProperty("admin")
         @Nullable String admin;
 
@@ -139,6 +145,12 @@ public class ProximityResponse {
         @JsonProperty("dist_m")
         double distanceM;
 
+        /**
+         * True bearing from query to aerodrome.
+         */
+        @JsonProperty("quj")
+        double quj;
+
         @JsonProperty("admin")
         String adminAuthority;
 
@@ -197,6 +209,12 @@ public class ProximityResponse {
 
         @JsonProperty("distOnAxis_m")
         double distOnAxisM;
+
+        /**
+         * Azimuth of the query location wrt to the runway orientation.
+         */
+        @JsonProperty("azimuthToQuery")
+        double azimuthToQuery;
     }
 
     @Value

@@ -41,7 +41,7 @@ public class RunwayExtractor
     }
 
     private Map<String, Runway.RunwayBuilder> findRunways(XPathDocumentExtractor dex)
-        throws XPathExpressionException, TransformException
+        throws XPathExpressionException
     {
         List<Node> nl = dex.extractNodes(runwayPathExpression(adUid));
 
@@ -63,36 +63,48 @@ public class RunwayExtractor
         Map<String, Runway.RunwayBuilder> ret = new HashMap<>();
 
         for (Node rwy : nl) {
-            assert rwy.getNodeType() == Node.ELEMENT_NODE : rwy;
+            String rwyId = "UNKNOWN";
+            try {
+                assert rwy.getNodeType() == Node.ELEMENT_NODE : rwy;
+                rwyId = mapAttributes(mapChildren(rwy).get("RwyUid")).get("mid");
 
-            var m = mapChildren(rwy);
-            var b = Runway.builder();
-
-            var rwyId = mapAttributes(m.get("RwyUid")).get("mid");
-
-            log.trace("Parsing runway {}", rwyId);
-
-            var designation = mapChildren(m.get("RwyUid")).get("txtDesig").getTextContent();
-
-            var sizeUnit = parseLengthUnit(m.get("uomDimRwy").getTextContent());
-            Quantity<Length> length = Quantities.getQuantity(Double.parseDouble(m.get("valLen").getTextContent()), sizeUnit);
-            Quantity<Length> width = Quantities.getQuantity(Double.parseDouble(m.get("valWid").getTextContent()), sizeUnit);
-
-            var composition = Optional.ofNullable(m.get("codeComposition")).map(Node::getTextContent).orElse(null);
-
-            b.designation(designation)
-             .length(length)
-             .width(width)
-             .surface(composition)
-             .paved(isPaved(composition));
-
-            findElevations(rwyId, b, dex);
-            findCoordinatesAndBearings(rwyId, b, dex);
-
-            ret.put(designation, b);
+                extractRunway(dex, rwy, rwyId, ret);
+            }
+            catch (Exception x) {
+//                throw new RuntimeException("Failed to parse runway %s on aerodrome %s".formatted(rwyId, adUid), x);
+                log.warn("Failed to parse runway {} on aerodrome {}", rwyId, adUid, x);
+            }
         }
 
         return ret;
+    }
+
+    private void extractRunway(XPathDocumentExtractor dex, Node rwy, String rwyId, Map<String, Runway.RunwayBuilder> stash)
+        throws XPathExpressionException, TransformException
+    {
+        var m = mapChildren(rwy);
+        var b = Runway.builder();
+
+        log.trace("Parsing runway {}", rwyId);
+
+        var designation = mapChildren(m.get("RwyUid")).get("txtDesig").getTextContent();
+
+        var sizeUnit = parseLengthUnit(childTextOrFail(m, "uomDimRwy"));
+        Quantity<Length> length = Quantities.getQuantity(Double.parseDouble(childTextOrFail(m, "valLen")), sizeUnit);
+        Quantity<Length> width = Quantities.getQuantity(Double.parseDouble(childTextOrFail(m, "valWid")), sizeUnit);
+
+        var composition = Optional.ofNullable(m.get("codeComposition")).map(Node::getTextContent).orElse(null);
+
+        b.designation(designation)
+         .length(length)
+         .width(width)
+         .surface(composition)
+         .paved(isPaved(composition));
+
+        findElevations(rwyId, b, dex);
+        findCoordinatesAndBearings(rwyId, b, dex);
+
+        stash.put(designation, b);
     }
 
     private void findElevations(String runwayId, Runway.RunwayBuilder builder, XPathDocumentExtractor dex)
@@ -122,7 +134,7 @@ public class RunwayExtractor
                                    .filter(n -> n.getNodeType() == Node.ELEMENT_NODE)
                                    .map(AixmUtils::mapChildren)
                                    .filter(m -> m.containsKey("valElev"))
-                                   .map(m -> Quantities.getQuantity(Double.parseDouble(m.get("valElev").getTextContent()), AixmUtils.parseLengthUnit(m.get("uomDistVer").getTextContent())));
+                                   .map(m -> Quantities.getQuantity(Double.parseDouble(childTextOrFail(m, "valElev")), AixmUtils.parseLengthUnit(childTextOrFail(m, "uomDistVer"))));
 
         DoubleSummaryStatistics dss = new DoubleSummaryStatistics();
         rwyAlts.mapToDouble(l -> l.to(Units.METRE).getValue().doubleValue()).forEach(dss);
@@ -175,7 +187,7 @@ public class RunwayExtractor
         var map = mapChildren(rdns.get(0));
         if (rdns.size() == 1) {
             if (map.containsKey("geoLong")) {
-                rwyCoord = new Point(lonToDecimal(map.get("geoLong").getTextContent()), latToDecimal(map.get("geoLat").getTextContent()));
+                rwyCoord = new Point(lonToDecimal(childTextOrFail(map, "geoLong")), latToDecimal(childTextOrFail(map, "geoLat")));
             }
             else {
                 rwyCoord = null;
@@ -190,12 +202,12 @@ public class RunwayExtractor
 
             DirectPosition2D pos1 = null, pos2 = null;
             if (map.containsKey("geoLong")) {
-                pos1 = new DirectPosition2D(lonToDecimal(map.get("geoLong").getTextContent()), latToDecimal(map.get("geoLat").getTextContent()));
+                pos1 = new DirectPosition2D(lonToDecimal(childTextOrFail(map, "geoLong")), latToDecimal(childTextOrFail(map, "geoLat")));
             }
 
             map = mapChildren(rdns.get(1));
             if(map.containsKey("geoLong")) {
-                pos2 = new DirectPosition2D(lonToDecimal(map.get("geoLong").getTextContent()), latToDecimal(map.get("geoLat").getTextContent()));
+                pos2 = new DirectPosition2D(lonToDecimal(childTextOrFail(map, "geoLong")), latToDecimal(childTextOrFail(map, "geoLat")));
             }
 
             if(pos1 != null && pos2 != null){
@@ -218,6 +230,15 @@ public class RunwayExtractor
         }
 
         builder.coordinates(rwyCoord).magBearing(magBearing).trueBearing(trueBearing);
+    }
+
+    static String childTextOrFail(Map<String, Node> childMap, String key){
+        Node n = childMap.get(key);
+        if(n == null){
+            throw new IllegalArgumentException("Missing child node '%s'".formatted(key));
+        }
+
+        return n.getTextContent();
     }
 
     String runwayPathExpression(String adUid) {

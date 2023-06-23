@@ -242,7 +242,7 @@ public class AixmImporter {
         AirspaceExtractor.forDangerousAirspace().extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
         AirspaceExtractor.forRestrictedAirspace().extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
         AirspaceExtractor.forProhibitedAirspace().extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
-        log.atLevel(Level.INFO).log("Extracted {} aerodromes in {}s", counter.getAndSet(0), Duration.between(start, now()).toMillis() / 1000d);
+        log.atLevel(Level.INFO).log("Extracted {} airspaces in {}s", counter.getAndSet(0), Duration.between(start, now()).toMillis() / 1000d);
     }
 
     void performHelipadAdminUpdate(XPathDocumentExtractor extractor, Result.ResultBuilder builder)

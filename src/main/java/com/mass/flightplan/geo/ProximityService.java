@@ -24,6 +24,7 @@ import si.uom.SI;
 import javax.measure.Quantity;
 import javax.measure.UnitConverter;
 import javax.measure.quantity.Length;
+import java.awt.geom.Point2D;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
@@ -95,6 +96,9 @@ public class ProximityService {
             geoCalc.setStartingGeographicPoint(queryLocation.getX(), queryLocation.getY());
             geoCalc.setDestinationGeographicPoint(he.coordinates().getX(), he.coordinates().getY());
             double minDc = geoCalc.getOrthodromicDistance(); //metres
+
+            // bearing from query location to airfield
+            ph.quj(azimuthToBearing(geoCalc.getAzimuth()));
 
             ph.distanceM(minDc);
 
@@ -176,9 +180,12 @@ public class ProximityService {
                                                          .contact(ae.contactInfos());
 
             geoCalc.setStartingGeographicPoint(queryLocation.getX(), queryLocation.getY());
-
             geoCalc.setDestinationGeographicPoint(ae.coordinates().getX(), ae.coordinates().getY());
+
             pa.distanceM(geoCalc.getOrthodromicDistance());
+
+            // bearing from query location to airfield
+            pa.quj(azimuthToBearing(geoCalc.getAzimuth()));
 
             double minDa = Double.POSITIVE_INFINITY;
 
@@ -244,6 +251,17 @@ public class ProximityService {
 
                 minDa = min(minDa, abs(a));
 
+                /*
+                    Bearing of query location relative to runway axis
+                 */
+                pr.azimuthToQuery(
+                    azimuthRelativeToRunway(
+                        new Point2D.Double(queryLocation.getX(), queryLocation.getY()),
+                        new Point2D.Double(rwyCoord.getX(), rwyCoord.getY()),
+                        rwyBrg, geoCalc
+                    )
+                );
+
                 pa.runway(pr.build());
             }
 
@@ -284,5 +302,22 @@ public class ProximityService {
         }
     }
 
+    /**
+     * Convert [-180, 180] azimuth to [0, 360[ bearing.
+     */
+    static double azimuthToBearing(double az){
+        return az < 0 ? az + 360 : az;
+    }
 
+    static double azimuthRelativeToRunway(Point2D location, Point2D runway, double runwayBearing, GeodeticCalculator calc) {
+        calc.setStartingGeographicPoint(runway);
+        calc.setDestinationGeographicPoint(location);
+        double az = calc.getAzimuth();
+
+        double relAz = az - runwayBearing;
+        while(relAz > 90) relAz -= 180;
+        while(relAz < -90) relAz += 180;
+
+        return relAz;
+    }
 }

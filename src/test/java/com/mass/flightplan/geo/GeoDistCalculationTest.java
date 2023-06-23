@@ -1,6 +1,7 @@
 package com.mass.flightplan.geo;
 
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.JTS;
@@ -11,6 +12,9 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.datum.DefaultEllipsoid;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.geometry.coordinate.Position;
@@ -18,6 +22,9 @@ import org.opengis.referencing.operation.TransformException;
 import si.uom.NonSI;
 
 import javax.measure.UnitConverter;
+import java.awt.geom.Point2D;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import static com.mass.flightplan.aixm.AixmUtils.latToDecimal;
 import static com.mass.flightplan.aixm.AixmUtils.lonToDecimal;
@@ -152,4 +159,52 @@ public class GeoDistCalculationTest {
 
         assertThat(d).isCloseTo(NonSI.NAUTICAL_MILE.getConverterTo(Units.METRE).convert(26.5), Percentage.withPercentage(1));
     }
+
+    @ParameterizedTest
+    @MethodSource("relativeAzimuthValues")
+    void azimuthRelativeToRunwayTest(Point2D location, Point2D runway)
+    {
+        /*
+            Here we check that our azimuthRelativeToRunway value (which we want to represent
+            the deviation from the runway axis of the mission point) stays the same regardless
+            of which direction we consider the runway in.
+         */
+
+        double rwyBrg = new Random().nextDouble() * 360;
+
+        GeodeticCalculator calc = new GeodeticCalculator();
+        assertThat(azimuthRelativeToRunway(runway, location, rwyBrg, calc))
+            .isEqualTo(azimuthRelativeToRunway(runway, location, (rwyBrg + 180) % 360, calc), Offset.offset(.000000000001));
+    }
+
+    static Stream<Arguments> relativeAzimuthValues() {
+        return Stream.of(
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.442654, 46.543352)),
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.442654, 46.543352)),
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.442654, 46.543352)),
+
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.408864, 46.538024)),
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.408864, 46.538024)),
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.408864, 46.538024)),
+
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.426864, 46.527198)),
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.426864, 46.527198)),
+            Arguments.of(new DirectPosition2D(3.424213, 46.534641), new DirectPosition2D(3.426864, 46.527198))
+        );
+    }
+
+
+    static double azimuthRelativeToRunway(Point2D location, Point2D runway, double runwayBearing, GeodeticCalculator calc)
+    {
+        calc.setStartingGeographicPoint(runway);
+        calc.setDestinationGeographicPoint(location);
+        double az = calc.getAzimuth();
+
+        double relAz = az - runwayBearing;
+        while(relAz > 90) relAz -= 180;
+        while(relAz < -90) relAz += 180;
+
+        return relAz;
+    }
+
 }
