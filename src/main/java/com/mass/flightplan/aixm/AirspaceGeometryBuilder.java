@@ -75,7 +75,7 @@ public class AirspaceGeometryBuilder {
                 .filter(Map.class::isInstance)
                 .map(o -> (String) ((Map<?, ?>) o).get("FNT"))
                 .filter(StringUtils::hasText)
-                .map(s -> List.of(s.split(",")))
+                .map(s -> Set.copyOf(List.of(s.split(","))))
                 .ifPresent(builder::frontiers);
 
         return builder.build();

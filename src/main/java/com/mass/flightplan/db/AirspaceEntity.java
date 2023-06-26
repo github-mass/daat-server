@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 @Document(collection = "airspaces")
@@ -118,7 +119,7 @@ public class AirspaceEntity {
     String maxCeiling;
 
     @Nullable
-    List<String> frontiers;
+    Set<String> frontiers;
 
     @NonNull
     @GeoSpatialIndexed(name = "aes_geom_idx", type = GeoSpatialIndexType.GEO_2DSPHERE)

@@ -241,7 +241,7 @@ public class ProximityResponse {
 
         @JsonProperty("frontiers")
         @Nullable
-        List<String> frontiers;
+        Set<String> frontiers;
 
         @JsonProperty("dist_m")
         double distanceM;

@@ -11,7 +11,7 @@ import org.springframework.lang.Nullable;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
-import java.util.List;
+import java.util.Set;
 
 @Value
 @Builder
@@ -28,7 +28,7 @@ public class Airspace {
     @NonNull Quantity<Length> maxCeiling;
 
     @Singular
-    List<String> frontiers;
+    Set<String> frontiers;
 
     @NonNull Geometry geometry;
 
