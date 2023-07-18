@@ -33,7 +33,6 @@ public class AixmDbImportTest {
         AixmImporter imp = AixmImporter.builder()
                                        .source(new FileSystemResource("./aixm/export_xml_bd_sia_2023-04-20-p2"))
                                        .parseSiaExport(true)
-                                       .sourceType("SIA")
                                        .altitudeService(altitudeService)
                                        .sourceName("test-data")
                                        .build();

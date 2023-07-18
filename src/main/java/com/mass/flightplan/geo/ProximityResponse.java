@@ -233,6 +233,14 @@ public class ProximityResponse {
         @Nullable
         String remark;
 
+        @JsonProperty("activationType")
+        @Nullable
+        String activationType;
+
+        @JsonProperty("activationRemark")
+        @Nullable
+        String activationRemark;
+
         @JsonProperty("minFloor")
         String minFloor;
 

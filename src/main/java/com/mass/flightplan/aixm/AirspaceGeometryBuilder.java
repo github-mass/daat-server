@@ -53,10 +53,18 @@ public class AirspaceGeometryBuilder {
         var nm = mapChildren(ase);
 
         builder.id(airspaceId);
-        builder.type(mapChildren(nm.get("AseUid")).get("codeType").getTextContent());
+
+        String aixmCode = mapChildren(nm.get("AseUid")).get("codeType").getTextContent();
+        String localType = Optional.ofNullable(nm.get("txtLocalType")).map(Node::getTextContent).orElse(null);
+        final AirspaceType aseType = AirspaceType.aixmParse(aixmCode, localType).orElseThrow(() -> new IllegalArgumentException("Could not determine airspace type: codeType=%s, txtLocalType=%s".formatted(aixmCode, localType)));
+        builder.type(aseType.code());
+
         builder.name(nm.get("txtName").getTextContent());
 
         Optional.ofNullable(nm.get("txtRmk")).map(Node::getTextContent).ifPresent(builder::remarks);
+
+        Optional.ofNullable(nm.get("Att")).map(AixmUtils::mapChildren).map(m -> m.get("codeWorkHr")).map(Node::getTextContent).ifPresent(builder::activationType);
+        Optional.ofNullable(nm.get("Att")).map(AixmUtils::mapChildren).map(m -> m.get("txtRmkWorkHr")).map(Node::getTextContent).ifPresent(builder::activationRemarks);
 
         //check for complex geometry
         Node n = dex.extractNode(airspaceDerivedGeometryPathExpression(airspaceId));

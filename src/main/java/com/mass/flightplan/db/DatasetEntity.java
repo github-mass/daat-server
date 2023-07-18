@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.lang.Nullable;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -22,10 +23,17 @@ public class DatasetEntity {
     BigInteger id;
 
     @Field("type")
-    String sourceType;
+    String datasetType;
 
     @Field("name")
     String sourceName;
+
+    @Field("srcDesc")
+    String sourceDescription;
+
+    @Field("deprecated")
+    @Nullable
+    Boolean deprecated;
 
     @Field("imported")
     @Indexed(direction = IndexDirection.DESCENDING)

@@ -13,6 +13,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.slf4j.event.Level;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayOutputStream;
@@ -36,8 +37,10 @@ import static java.time.Instant.now;
 @Slf4j
 public class AixmImporter {
 
-    private final @NonNull String sourceType;
+    private static final String DATASET_TYPE = "SIA/AIXM";
+
     private final @NonNull String sourceName;
+    private final @Nullable String sourceDescription;
     private final @NonNull Resource source;
 
     private final AltitudeService altitudeService;
@@ -210,7 +213,8 @@ public class AixmImporter {
 
             builder.created(now());
             builder.sourceName(sourceName);
-            builder.sourceType(sourceType);
+            builder.datasetType(DATASET_TYPE);
+            builder.sourceDescription(sourceDescription);
             builder.origin(origin);
             builder.created(ZonedDateTime.parse(created).toInstant());
             builder.effective(ZonedDateTime.parse(effective).toInstant());
@@ -239,10 +243,40 @@ public class AixmImporter {
 
         start = now();
         log.atLevel(Level.INFO).log("Starting airspace extraction");
-        AirspaceExtractor.forDangerousAirspace().extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
-        AirspaceExtractor.forRestrictedAirspace().extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
-        AirspaceExtractor.forProhibitedAirspace().extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
+
+        int subCount;
+
+        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.PROHIBITED), extractor, builder);
+        counter.addAndGet(subCount);
+        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'P'");
+
+        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.RESTRICTED), extractor, builder);
+        counter.addAndGet(subCount);
+        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'R'");
+
+        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.DANGEROUS), extractor, builder);
+        counter.addAndGet(subCount);
+        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'D'");
+
+//        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.NATURAL_RESERVE), extractor, builder);
+//        counter.addAndGet(subCount);
+//        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'natural reserve'");
+
+        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.PARACHUTING_ZONE), extractor, builder);
+        counter.addAndGet(subCount);
+        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'parachute zone'");
+
         log.atLevel(Level.INFO).log("Extracted {} airspaces in {}s", counter.getAndSet(0), Duration.between(start, now()).toMillis() / 1000d);
+    }
+
+    int performAirspaceExtraction(
+        AirspaceExtractor airspaceExtractor, XPathDocumentExtractor extractor, Result.ResultBuilder builder
+    )
+        throws XPathExpressionException, TransformException
+    {
+        AtomicInteger counter = new AtomicInteger();
+        airspaceExtractor.extract(extractor).stream().peek(i -> counter.incrementAndGet()).forEach(builder::airspace);
+        return counter.get();
     }
 
     void performHelipadAdminUpdate(XPathDocumentExtractor extractor, Result.ResultBuilder builder)

@@ -21,6 +21,8 @@ public class Airspace {
     @NonNull String type;
     @NonNull String name;
     @Nullable String remarks;
+    @Nullable String activationType;
+    @Nullable String activationRemarks;
 
     @NonNull Quantity<Length> minFloor;
     @NonNull Quantity<Length> maxFloor;
@@ -34,6 +36,7 @@ public class Airspace {
 
     public static class AirspaceBuilder {
 
+        @SuppressWarnings({"unchecked", "ConstantConditions"})
         public AirspaceBuilder adjustCeiling(Quantity<Length> ceiling){
             if(maxCeiling == null || ((Comparable<Object>)ceiling).compareTo(maxCeiling) > 0){
                 maxCeiling = ceiling;
@@ -45,6 +48,7 @@ public class Airspace {
             return this;
         }
 
+        @SuppressWarnings({"unchecked", "ConstantConditions"})
         public AirspaceBuilder adjustFloor(Quantity<Length> floor){
             if(maxFloor == null || ((Comparable<Object>)floor).compareTo(maxFloor) > 0){
                 maxFloor = floor;

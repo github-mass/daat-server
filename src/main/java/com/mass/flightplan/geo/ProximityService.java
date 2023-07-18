@@ -136,6 +136,8 @@ public class ProximityService {
                                                         .code(as.code())
                                                         .type(as.type())
                                                         .remark(as.remark())
+                                                        .activationType(as.activationType())
+                                                        .activationRemark(as.activationRemark())
                                                         .frontiers(as.frontiers())
                                                         .minFloor(as.minFloor())
                                                         .maxCeiling(as.maxCeiling());
@@ -237,10 +239,10 @@ public class ProximityService {
                     Careful, this affects coordinates in GeodeticCalculator.
                  */
                 double qte = azimuthRelativeToRunway(
-                        new Point2D.Double(queryLocation.getX(), queryLocation.getY()),
-                        new Point2D.Double(rwyCoord.getX(), rwyCoord.getY()),
-                        rwyBrg, geoCalc
-                    );
+                    new Point2D.Double(queryLocation.getX(), queryLocation.getY()),
+                    new Point2D.Double(rwyCoord.getX(), rwyCoord.getY()),
+                    rwyBrg, geoCalc
+                );
 
                 double A = abs(degreesToRadians.convert(qte));
                 double c = distToLocation / DefaultEllipsoid.WGS84.getSemiMajorAxis();
@@ -307,7 +309,7 @@ public class ProximityService {
     /**
      * Convert [-180, 180] azimuth to [0, 360[ bearing.
      */
-    static double azimuthToBearing(double az){
+    static double azimuthToBearing(double az) {
         return az < 0 ? az + 360 : az;
     }
 
@@ -317,8 +319,8 @@ public class ProximityService {
         double az = calc.getAzimuth();
 
         double relAz = az - runwayBearing;
-        while(relAz > 90) relAz -= 180;
-        while(relAz < -90) relAz += 180;
+        while (relAz > 90) relAz -= 180;
+        while (relAz < -90) relAz += 180;
 
         return relAz;
     }

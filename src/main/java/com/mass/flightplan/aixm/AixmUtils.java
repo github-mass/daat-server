@@ -31,10 +31,18 @@ import static java.lang.Math.PI;
 @UtilityClass
 public class AixmUtils {
 
+    /**
+     * <p>Returns a map whose keys are the names of the child elements of the specified node, and the values the child nodes themselves.</p>
+     * <p><em>WARNING:</em> If there are multiple child elements with the same name, <em>only the last one is retained</em>.</p>
+     * <p>If the node does not have child elements, returns an empty map.</p>
+     *
+     * @param n the node whose child elements should be accessed.
+     * @return A mapping of child element name -> child element.
+     */
     public static Map<String, Node> mapChildren(Node n) {
         return toStream(n.getChildNodes())
             .filter(n0 -> n0.getNodeType() == Node.ELEMENT_NODE)
-            .collect(Collectors.toMap(Node::getNodeName, Function.identity()));
+            .collect(Collectors.toMap(Node::getNodeName, Function.identity(), (n1, n2) -> n2)); //silently dropping duplicate children here
     }
 
     public static Map<String, String> mapAttributes(Node n) {

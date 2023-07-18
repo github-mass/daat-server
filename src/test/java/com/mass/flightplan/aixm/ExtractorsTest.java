@@ -66,7 +66,7 @@ public class ExtractorsTest {
     public void test_R_AirspaceExtraction()
         throws XPathExpressionException, TransformException
     {
-        var list = AirspaceExtractor.forRestrictedAirspace().extract(dex);
+        var list = AirspaceExtractor.forType(AirspaceType.RESTRICTED).extract(dex);
         log.info("Found {} R airspace entries", list.size());
         list.forEach(System.out::println);
         log.info("Found {} R airspace entries", list.size());
@@ -76,7 +76,7 @@ public class ExtractorsTest {
     public void test_D_AirspaceExtraction()
         throws XPathExpressionException, TransformException
     {
-        var list = AirspaceExtractor.forDangerousAirspace().extract(dex);
+        var list = AirspaceExtractor.forType(AirspaceType.DANGEROUS).extract(dex);
         log.info("Found {} D airspace entries", list.size());
         list.forEach(System.out::println);
         log.info("Found {} D airspace entries", list.size());
@@ -86,7 +86,7 @@ public class ExtractorsTest {
     public void test_P_AirspaceExtraction()
         throws XPathExpressionException, TransformException
     {
-        var list = AirspaceExtractor.forProhibitedAirspace().extract(dex);
+        var list = AirspaceExtractor.forType(AirspaceType.PROHIBITED).extract(dex);
         log.info("Found {} P airspace entries", list.size());
         list.forEach(System.out::println);
         log.info("Found {} P airspace entries", list.size());

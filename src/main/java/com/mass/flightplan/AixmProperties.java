@@ -1,9 +1,6 @@
 package com.mass.flightplan;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -16,6 +13,7 @@ import java.util.List;
 @Data
 @Accessors(fluent = false)
 @Validated
+@SuppressWarnings("DefaultAnnotationParam")
 public class AixmProperties {
 
     @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
@@ -35,8 +33,16 @@ public class AixmProperties {
     @Data
     @Accessors(fluent = false)
     public static class AixmImportProperties {
-        private List<String> sources = new ArrayList<>();
+        private List<AixmImportSource> sources = new ArrayList<>();
         private boolean parseSiaExport = true;
+    }
+
+    @Data
+    @ToString
+    @Accessors(fluent = false)
+    public static class AixmImportSource {
+        private String uri;
+        private String description;
     }
 
     @Data

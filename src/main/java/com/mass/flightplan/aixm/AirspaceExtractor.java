@@ -57,24 +57,19 @@ public class AirspaceExtractor
         return tryExtractOne(docExtractor).orElse(null);
     }
 
-    @Language("XPath")
-    protected static String specialAirspacePathExpression(String type){
-        return "/AIXM-Snapshot/Ase[AseUid/codeType='%s']".formatted(type);
-    }
-
-    public static AirspaceExtractor forRestrictedAirspace(){
-        return new AirspaceExtractor(specialAirspacePathExpression("R"));
-    }
-
-    public static AirspaceExtractor forDangerousAirspace(){
-        return new AirspaceExtractor(specialAirspacePathExpression("D"));
-    }
-
-    public static AirspaceExtractor forProhibitedAirspace(){
-        return new AirspaceExtractor(specialAirspacePathExpression("P"));
-    }
-
     public static AixmExtractor<Airspace> forAirspaceById(String airspaceId){
         return new AirspaceExtractor("/AIXM-Snapshot/Ase[AseUid/@mid='" + airspaceId + "']")::extractOne;
+    }
+
+    public static AirspaceExtractor forType(@NonNull AirspaceType type){
+        if(type.aixmLocalType() == null){
+            return new AirspaceExtractor(
+                "/AIXM-Snapshot/Ase[AseUid/codeType='%s']".formatted(type.aixmTypeCode())
+            );
+        } else {
+            return new AirspaceExtractor(
+                "/AIXM-Snapshot/Ase[AseUid/codeType='%s' and txtLocalType='%s']".formatted(type.aixmTypeCode(), type.aixmLocalType())
+            );
+        }
     }
 }
