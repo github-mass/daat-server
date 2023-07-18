@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.mass</groupId>
     <artifactId>flightplan-server</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <name>Flightplan Server</name>
     <description>Backend for the Flightplan app</description>
 

@@ -37,6 +37,7 @@ public class AirspaceEntity {
         this(
             null, dataset,
             as.type(), as.name(), as.remarks(),
+            as.activationType(), as.activationRemarks(),
             as.minFloor().toString(), as.maxFloor().toString(),
             as.minCeiling().toString(), as.maxCeiling().toString(),
             as.frontiers(),
@@ -105,6 +106,15 @@ public class AirspaceEntity {
     @Field("remark")
     @Nullable
     String remark;
+
+    @Field("activationType")
+    @Nullable
+    String activationType;
+
+    @Field("activationRemark")
+    @Nullable
+    String activationRemark;
+
 
     @Field("minFloor")
     String minFloor;

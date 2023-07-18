@@ -15,7 +15,7 @@ altitude-service:
 aixm:
   import:
     sources:
-      - "file:aixm/export_xml_bd_sia_2023-05-18-a3"
+      - uri: "file:aixm/export_xml_bd_sia_2023-05-18-a3"
     parse-sia-export: true
 
   update:

@@ -10,8 +10,9 @@ import java.time.Instant;
 @Builder
 public class Dataset {
 
-    String sourceType;
+    String datasetType;
     String sourceName;
+    String sourceDescription;
     String origin;
     Instant created;
     Instant effective;
@@ -19,8 +20,8 @@ public class Dataset {
     public DatasetEntity toEntity() {
         return new DatasetEntity(
             null,
-            sourceType(), sourceName(),
-            null,
+            datasetType(), sourceName(), sourceDescription(),
+            false, null,
             origin(),
             created(), effective()
         );
