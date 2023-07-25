@@ -1,6 +1,6 @@
 package com.mass.flightplan.db;
 
-import com.mass.flightplan.aixm.Runway;
+import com.mass.flightplan.model.aixm.Runway;
 import lombok.*;
 import org.geotools.measure.Units;
 import org.springframework.data.annotation.PersistenceCreator;

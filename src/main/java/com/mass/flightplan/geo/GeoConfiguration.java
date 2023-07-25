@@ -1,9 +1,6 @@
 package com.mass.flightplan.geo;
 
-import com.mass.flightplan.db.AerodromeRepository;
-import com.mass.flightplan.db.AirspaceRepository;
-import com.mass.flightplan.db.DatasetRepository;
-import com.mass.flightplan.db.HeliportRepository;
+import com.mass.flightplan.db.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.ssl.SslContextBuilder;
 import lombok.RequiredArgsConstructor;
@@ -81,8 +78,9 @@ public class GeoConfiguration {
         DatasetRepository datasetRepo,
         AerodromeRepository adRepo,
         HeliportRepository hpRepo,
-        AirspaceRepository asRepo
+        AirspaceRepository asRepo,
+        ZicadRepository zicadRepo
     ){
-        return new ProximityService(altitudeService, datasetRepo, adRepo, hpRepo, asRepo, properties);
+        return new ProximityService(altitudeService, datasetRepo, adRepo, hpRepo, asRepo, zicadRepo, properties);
     }
 }

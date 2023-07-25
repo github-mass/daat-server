@@ -2,6 +2,8 @@ package com.mass.flightplan;
 
 import com.mass.flightplan.db.AixmDbImporter;
 import com.mass.flightplan.db.DatasetRepository;
+import com.mass.flightplan.db.GeometryConverter;
+import com.mass.flightplan.db.ZicadDbImporter;
 import com.mass.flightplan.geo.AltitudeService;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +21,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public AixmDbImporter aixmDbImporter(@NonNull MongoTemplate mongo){
-        return new AixmDbImporter(mongo);
+    public AixmDbImporter aixmDbImporter(@NonNull MongoTemplate mongo, @NonNull GeometryConverter geometryConverter){
+        return new AixmDbImporter(mongo, geometryConverter);
     }
 
     @Bean
@@ -31,6 +33,26 @@ public class ApplicationConfiguration {
         @NonNull DatasetRepository dataSetRepo
     ){
         return new AixmUpdateService(properties, altitudeService, dbImporter, dataSetRepo);
+    }
+
+    @Bean
+    @RefreshScope
+    public ZicadProperties zicadProperties(){
+        return new ZicadProperties();
+    }
+
+    @Bean
+    public ZicadDbImporter zicadDbImporter(@NonNull MongoTemplate mongo, @NonNull GeometryConverter geometryConverter){
+        return new ZicadDbImporter(mongo, geometryConverter);
+    }
+
+    @Bean
+    public ZicadUpdateService zicadUpdateService(
+        @NonNull ZicadProperties properties,
+        @NonNull ZicadDbImporter dbImporter,
+        @NonNull DatasetRepository dataSetRepo
+    ){
+        return new ZicadUpdateService(properties, dbImporter, dataSetRepo);
     }
 
 }

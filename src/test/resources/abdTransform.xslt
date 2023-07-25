@@ -5,7 +5,8 @@
 
     <xsl:strip-space elements="*" />
 
-    <xsl:template match="AIXM-Snapshot/Abd[AbdUid/@mid='8566113']">
+    <xsl:template match="AIXM-Snapshot/Abd[AbdUid/@mid='1568698']">
+<!--    <xsl:template match="AIXM-Snapshot/Abd[AbdUid/@mid='1570902']">-->
         <xsl:for-each select="Avx">
             <xsl:value-of select="codeType"/>::<xsl:value-of select="geoLat"/>,<xsl:value-of select="geoLong"/>
 <xsl:text>

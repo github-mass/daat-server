@@ -1,6 +1,6 @@
 package com.mass.flightplan.db;
 
-import com.mass.flightplan.aixm.TakeOffLandingArea;
+import com.mass.flightplan.model.aixm.TakeOffLandingArea;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;

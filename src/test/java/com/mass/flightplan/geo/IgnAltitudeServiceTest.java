@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = GeoConfiguration.class)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, EmbeddedMongoAutoConfiguration.class, MongoAutoConfiguration.class})
-@ActiveProfiles("test")
+@ActiveProfiles("aixm-test")
 @Slf4j
 @TestPropertySource(properties = {
     "logging.level.com.mass.flightplan.geo=TRACE"

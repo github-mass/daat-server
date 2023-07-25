@@ -1,10 +1,10 @@
 package com.mass.flightplan;
 
-import com.mass.flightplan.aixm.AixmImporter;
 import com.mass.flightplan.db.AixmDbImporter;
 import com.mass.flightplan.db.DatasetEntity;
 import com.mass.flightplan.db.DatasetRepository;
 import com.mass.flightplan.geo.AltitudeService;
+import com.mass.flightplan.model.aixm.AixmImporter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ public class AixmUpdateService {
         }
 
         try {
-            log.info("Checking for updated sources");
+            log.info("Checking for updated AIXM sources");
 
             List<AixmProperties.AixmImportSource> todo = sourcesToBeImported();
 
@@ -65,7 +65,7 @@ public class AixmUpdateService {
         List<AixmProperties.AixmImportSource> copy = new ArrayList<>(sources);
 
         Set<String> existing = new HashSet<>();
-        for (DatasetEntity dse : dataSetRepo.findAll()) {
+        for (DatasetEntity dse : dataSetRepo.findAllAixm()) {
             if(dse.deprecated() != Boolean.TRUE) {
                 existing.add(dse.sourceName());
             }

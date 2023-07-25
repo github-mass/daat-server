@@ -1,9 +1,9 @@
 package com.mass.flightplan.db;
 
-import com.mass.flightplan.aixm.Aerodrome;
-import com.mass.flightplan.aixm.Airspace;
-import com.mass.flightplan.aixm.AixmImporter;
-import com.mass.flightplan.aixm.Heliport;
+import com.mass.flightplan.model.aixm.Aerodrome;
+import com.mass.flightplan.model.aixm.Airspace;
+import com.mass.flightplan.model.aixm.AixmImporter;
+import com.mass.flightplan.model.aixm.Heliport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -21,6 +21,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 public class AixmDbImporter {
 
     private final @lombok.NonNull MongoTemplate mongo;
+    private final @lombok.NonNull GeometryConverter geometryConverter;
 
     public void importResult(@NonNull AixmImporter.Result result){
         log.info("Storing dataset to DB: {}", result.dataset());
@@ -59,7 +60,7 @@ public class AixmDbImporter {
 
         for(Aerodrome ae: result.aerodromes()){
             //if there's a CTR, take care of that first
-            AerodromeEntity aee = ae.toEntity(dse);
+            AerodromeEntity aee = ae.toEntity(dse, geometryConverter);
 
             AirspaceEntity ctr = aee.ctr();
             if(ctr != null){
@@ -75,7 +76,7 @@ public class AixmDbImporter {
         }
 
         for(Airspace as: result.airspaces()){
-            AirspaceEntity ase = as.toEntity(dse);
+            AirspaceEntity ase = as.toEntity(dse, geometryConverter);
             mongo.insert(ase);
         }
 

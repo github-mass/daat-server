@@ -1,8 +1,8 @@
 package com.mass.flightplan.web;
 
-import com.mass.flightplan.aixm.AixmUtils;
 import com.mass.flightplan.geo.ProximityResponse;
 import com.mass.flightplan.geo.ProximityService;
+import com.mass.flightplan.model.ModelUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -59,7 +59,7 @@ public class ProximityController {
         try {
             //degrees, minutes and seconds, with decimal parts, trailing one optional, without spaces
             lon = lon.replaceAll("[\\s+°'\"]", "");
-            return AixmUtils.lonToDecimal(lon);
+            return ModelUtils.lonToDecimal(lon);
         }
         catch (NumberFormatException nfex) {
             //ignore
@@ -82,7 +82,7 @@ public class ProximityController {
         try {
             //degrees, minutes and seconds, with decimal parts, trailing one optional, without spaces
             lat = lat.replaceAll("[\\s+°'\"]", "");
-            return AixmUtils.latToDecimal(lat);
+            return ModelUtils.latToDecimal(lat);
         }
         catch (NumberFormatException nfex) {
             //ignore

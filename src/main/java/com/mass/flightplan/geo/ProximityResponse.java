@@ -24,8 +24,9 @@ public class ProximityResponse {
     @JsonProperty("alt_m")
     double altitudeM;
 
-    @JsonProperty("dataset")
-    DatasetInfo dataset;
+    @JsonProperty("datasets")
+    @Singular
+    List<DatasetInfo> datasets;
 
     @JsonProperty("proxHp")
     @Singular
@@ -39,6 +40,11 @@ public class ProximityResponse {
     @Singular
     List<ProximateAirspace> proximateAirspaces;
 
+    @JsonProperty("proxZicad")
+    @Singular
+    List<ProximateZicad> proximateZicads;
+
+
     @Value
     @Builder
     @EqualsAndHashCode
@@ -47,8 +53,8 @@ public class ProximityResponse {
         @JsonProperty("source")
         String source;
 
-        @JsonProperty("created")
-        Instant created;
+//        @JsonProperty("created")
+//        Instant created;
 
         @JsonProperty("effective")
         Instant effective;
@@ -250,6 +256,23 @@ public class ProximityResponse {
         @JsonProperty("frontiers")
         @Nullable
         Set<String> frontiers;
+
+        @JsonProperty("dist_m")
+        double distanceM;
+    }
+
+    @Value
+    @Builder
+    @EqualsAndHashCode
+    @Getter(onMethod = @__(@JsonProperty))
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public static class ProximateZicad {
+        @JsonProperty("areaId")
+        String areaId;
+
+        @JsonProperty("name")
+        @Nullable
+        String name;
 
         @JsonProperty("dist_m")
         double distanceM;

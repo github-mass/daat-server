@@ -13,4 +13,6 @@ public class ProximityServiceProperties {
 
     private double airspaceMaxDistanceKM = 2; // max distance the drone can legally fly from the mission point.
 
+    private double zicadMaxDistanceKM = 2;
+
 }

@@ -26,8 +26,8 @@ import java.awt.geom.Point2D;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import static com.mass.flightplan.aixm.AixmUtils.latToDecimal;
-import static com.mass.flightplan.aixm.AixmUtils.lonToDecimal;
+import static com.mass.flightplan.model.ModelUtils.latToDecimal;
+import static com.mass.flightplan.model.ModelUtils.lonToDecimal;
 import static java.lang.Math.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
