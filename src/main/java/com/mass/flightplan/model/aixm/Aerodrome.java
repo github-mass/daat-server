@@ -2,7 +2,7 @@ package com.mass.flightplan.model.aixm;
 
 import com.mass.flightplan.db.AerodromeEntity;
 import com.mass.flightplan.db.DatasetEntity;
-import com.mass.flightplan.db.GeometryConverter;
+import com.mass.flightplan.util.GeometryConverter;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;

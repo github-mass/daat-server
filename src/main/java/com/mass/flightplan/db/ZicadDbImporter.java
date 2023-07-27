@@ -2,6 +2,7 @@ package com.mass.flightplan.db;
 
 import com.mass.flightplan.model.zicad.ZicadImporter;
 import com.mass.flightplan.model.zicad.ZicadZone;
+import com.mass.flightplan.util.GeometryConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;

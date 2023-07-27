@@ -1,6 +1,7 @@
 package com.mass.flightplan.db;
 
 import com.mass.flightplan.model.aixm.Airspace;
+import com.mass.flightplan.util.GeometryConverter;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
@@ -23,7 +24,7 @@ public class AirspaceEntity {
     public AirspaceEntity(Airspace as, DatasetEntity dataset, GeometryConverter converter) {
         this(
             null, dataset,
-            as.type(), as.code(), as.remarks(),
+            as.type(), as.code(), as.name(), as.remarks(),
             as.activationType(), as.activationRemarks(),
             as.minFloor().toString(), as.maxFloor().toString(),
             as.minCeiling().toString(), as.maxCeiling().toString(),
@@ -47,6 +48,10 @@ public class AirspaceEntity {
     @Field("code")
     @NonNull
     String code;
+
+    @Field("name")
+    @Nullable
+    String name;
 
     @Field("remark")
     @Nullable

@@ -106,7 +106,6 @@ public class AixmUpdateService {
                                        .sourceName(source.getUri())
                                        .sourceDescription(source.getDescription())
                                        .altitudeService(altitudeService)
-                                       .parseSiaExport(properties.getImport().isParseSiaExport())
                                        .source(resource)
                                        .build();
 

@@ -10,15 +10,11 @@ import org.geotools.referencing.datum.DefaultEllipsoid;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
-import org.springframework.data.mongodb.core.geo.GeoJson;
-import org.springframework.data.mongodb.core.geo.GeoJsonMultiPolygon;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
-import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import org.springframework.lang.NonNull;
 import si.uom.SI;
 
@@ -27,15 +23,15 @@ import javax.measure.UnitConverter;
 import javax.measure.quantity.Length;
 import java.awt.geom.Point2D;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.*;
 import static java.time.Instant.now;
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -137,6 +133,7 @@ public class ProximityService {
             var pa = ProximityResponse.ProximateAirspace.builder()
                                                         .code(as.code())
                                                         .type(as.type())
+                                                        .name(as.name())
                                                         .remark(as.remark())
                                                         .activationType(as.activationType())
                                                         .activationRemark(as.activationRemark())
@@ -144,26 +141,28 @@ public class ProximityService {
                                                         .minFloor(as.minFloor())
                                                         .maxCeiling(as.maxCeiling());
 
-            Geometry geom = toGeometry(as.geometry());
-            double dist;
+            Geometry geom = GeoUtils.toGeometry(as.geometry());
+            double dist, quj;
 
             org.locationtech.jts.geom.Point locAsJtsPoint = JTSFactoryFinder
                 .getGeometryFactory().createPoint(new Coordinate(queryLocation.getX(), queryLocation.getY()));
 
             if (geom.contains(locAsJtsPoint)) {
-                dist = 0;
+                dist = quj = 0;
                 insideAirspaces.add(as.id());
             }
             else {
-                Coordinate[] closest = DistanceOp.nearestPoints(geom, locAsJtsPoint);
+                Coordinate[] closest = DistanceOp.nearestPoints(locAsJtsPoint, geom);
 
                 geoCalc.setStartingGeographicPoint(closest[0].x, closest[0].y);
                 geoCalc.setDestinationGeographicPoint(closest[1].x, closest[1].y);
 
                 dist = geoCalc.getOrthodromicDistance();
+                quj = azimuthToBearing(geoCalc.getAzimuth());
             }
 
             pa.distanceM(dist);
+            pa.quj(quj);
 
             responseBuilder.proximateAirspace(pa.build());
         }
@@ -308,56 +307,37 @@ public class ProximityService {
             }
 
             var zb = ProximityResponse.ProximateZicad.builder();
-            zb.name(ze.siteName()).areaId(ze.areaId());
+            zb
+                .name(ze.siteName())
+                .areaId(ze.areaId())
+                .commune(ze.commune())
+                .authority(ze.ministry())
+                .effective(LocalDate.ofInstant(ze.effective(), ZoneId.systemDefault()))
+            ;
 
-            Geometry geom = toGeometry(ze.geometry());
-            double dist;
+
+            Geometry geom = GeoUtils.toGeometry(ze.geometry());
+            double dist, quj;
 
             org.locationtech.jts.geom.Point locAsJtsPoint = gFact.createPoint(new Coordinate(queryLocation.getX(), queryLocation.getY()));
 
             if (geom.contains(locAsJtsPoint)) {
-                dist = 0;
+                dist = quj = 0;
             }
             else {
-                Coordinate[] closest = DistanceOp.nearestPoints(geom, locAsJtsPoint);
+                Coordinate[] closest = DistanceOp.nearestPoints(locAsJtsPoint, geom);
 
                 geoCalc.setStartingGeographicPoint(closest[0].x, closest[0].y);
                 geoCalc.setDestinationGeographicPoint(closest[1].x, closest[1].y);
 
                 dist = geoCalc.getOrthodromicDistance();
+                quj = azimuthToBearing(geoCalc.getAzimuth());
             }
 
             zb.distanceM(dist);
+            zb.quj(quj);
 
             responseBuilder.proximateZicad(zb.build());
-        }
-    }
-
-    static Geometry toGeometry(GeoJson<?> geojson) {
-        GeometryFactory gf = JTSFactoryFinder.getGeometryFactory();
-        switch (geojson.getType()) {
-            case "Point" -> {
-                GeoJsonPoint p = (GeoJsonPoint) geojson;
-                return gf.createPoint(new Coordinate(p.getX(), p.getY()));
-            }
-            case "Polygon" -> {
-                GeoJsonPolygon p = (GeoJsonPolygon) geojson;
-                return p.getCoordinates().stream()
-                        .map(ls ->
-                            ls.getCoordinates()
-                              .stream()
-                              .map(point -> new Coordinate(point.getX(), point.getY()))
-                        )
-                        .map(stream -> gf.createLinearRing(stream.toArray(Coordinate[]::new)))
-                        .collect(Collectors.collectingAndThen(toList(), l -> gf.createPolygon(l.get(0), l.stream().skip(1).toArray(LinearRing[]::new))));
-            }
-            case "MultiPolygon" -> {
-                GeoJsonMultiPolygon p = (GeoJsonMultiPolygon) geojson;
-                return p.getCoordinates().stream()
-                        .map(ProximityService::toGeometry)
-                        .collect(Collectors.collectingAndThen(toList(), gf::buildGeometry));
-            }
-            default -> throw new IllegalArgumentException("Unexpected GeoJSON: " + geojson);
         }
     }
 

@@ -25,10 +25,10 @@ public class ModelUtils {
 
     // Pattern taken from XSD
     private static final Pattern AIXM_LAT_PATTERN = Pattern.compile(
-        "([0-8][0-9][0-5][0-9][0-5][0-9](\\.\\d{1,4})?([NS]))|([0-8][0-9][0-5][0-9](\\.\\d{1,8})?([NS]))|([0-8][0-9](\\.\\d{1,8})?([NS]))|(900000(\\.0{1,4})?([NS]))|(9000(\\.0{1,8})?([NS]))|(90(\\.0{1,8})?([NS]))"
+        "([0-8][0-9]°?[0-5][0-9]'?[0-5][0-9](\\.\\d{1,4})?\"?([NS]))|([0-8][0-9]°?[0-5][0-9](\\.\\d{1,8})?'?([NS]))|([0-8][0-9](\\.\\d{1,8})?°?([NS]))|(900000(\\.0{1,4})?°?([NS]))|(9000(\\.0{1,8})?°?([NS]))|(90(\\.0{1,8})?°?([NS]))"
     );
     private static final Pattern AIXM_LON_PATTERN = Pattern.compile(
-        "(((0[0-9])|(1[0-7]))[0-9][0-5][0-9][0-5][0-9](\\.\\d{1,4})?([EW]))|(((0[0-9])|(1[0-7]))[0-9][0-5][0-9](\\.\\d{1,8})?([EW]))|(((0[0-9])|(1[0-7]))[0-9](\\.\\d{1,8})?([EW]))|(1800000(\\.0{1,4})?([EW]))|(18000(\\.0{1,8})?([EW]))|(180(\\.0{1,8})?([EW]))"
+        "(((0[0-9])|(1[0-7]))[0-9]°?[0-5][0-9]'?[0-5][0-9](\\.\\d{1,4})?\"?([EW]))|(((0[0-9])|(1[0-7]))[0-9]°?[0-5][0-9](\\.\\d{1,8})?'?([EW]))|(((0[0-9])|(1[0-7]))[0-9](\\.\\d{1,8})?°?([EW]))|(1800000(\\.0{1,4})?°?([EW]))|(18000(\\.0{1,8})?°?([EW]))|(180(\\.0{1,8})?°?([EW]))"
     );
 
     public static double latToDecimal(String lat) {
@@ -37,7 +37,7 @@ public class ModelUtils {
             throw new IllegalArgumentException("Invalid latitude: " + lat);
         }
 
-        String match = m.group();
+        String match = m.group().replaceAll("[°'\"]", "");
 
         final int integralLength = match.indexOf('.') == -1 ? match.length() - 1 : match.indexOf('.');
 
@@ -68,7 +68,7 @@ public class ModelUtils {
             throw new IllegalArgumentException("Invalid longitude: " + lon);
         }
 
-        String match = m.group();
+        String match = m.group().replaceAll("[°'\"]", "");
 
         //always min three digits for the integer part
 
@@ -102,14 +102,14 @@ public class ModelUtils {
             case "KM" -> Units.KILOMETER;
             case "NM" -> Units.NAUTICAL_MILE;
             case "FT" -> Units.FOOT;
-            case "FT_HEI" -> FEET_HEIGHT;
-            case "FT_ALT" -> FEET_AMSL;
-            case "FL_STD" -> FLIGHT_LEVEL;
+            case "FT_HEI", "ft ASFC" -> FEET_HEIGHT;
+            case "FT_ALT", "ft AMSL" -> FEET_AMSL;
+            case "FL_STD", "FL" -> FLIGHT_LEVEL;
             default -> throw new IllegalArgumentException("Unknown unit: " + unit);
         };
     }
 
-    private static final Unit<Length> FLIGHT_LEVEL, FEET_HEIGHT, FEET_AMSL;
+    public static final Unit<Length> FLIGHT_LEVEL, FEET_HEIGHT, FEET_AMSL;
 
     private static final AbstractConverter METRE_TO_FL = new AbstractConverter() {
         @Override

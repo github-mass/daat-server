@@ -20,7 +20,6 @@ class AixmImporterTest {
     {
         AixmImporter imp = AixmImporter.builder()
             .source(new FileSystemResource("./data/aixm/export_xml_bd_sia_2023-04-20-p2"))
-            .parseSiaExport(true)
             .altitudeService(altitudeService)
             .sourceName("test-data")
             .sourceDescription("TestCase")
@@ -34,7 +33,7 @@ class AixmImporterTest {
         assertThat(result.dataset()).extracting(Dataset::created).isNotNull();
         assertThat(result.dataset()).extracting(Dataset::effective).isNotNull();
         assertThat(result.dataset()).extracting(Dataset::sourceName).isEqualTo("test-data");
-        assertThat(result.dataset()).extracting(Dataset::datasetType).isEqualTo("SIA");
+        assertThat(result.dataset()).extracting(Dataset::datasetType).isEqualTo("SIA/AIXM");
 
         assertThat(result.aerodromes()).isNotEmpty();
         assertThat(result.aerodromes()).hasSize(562);

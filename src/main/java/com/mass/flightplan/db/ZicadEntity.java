@@ -1,6 +1,7 @@
 package com.mass.flightplan.db;
 
 import com.mass.flightplan.model.zicad.ZicadZone;
+import com.mass.flightplan.util.GeometryConverter;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;

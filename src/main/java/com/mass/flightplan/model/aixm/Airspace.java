@@ -2,7 +2,7 @@ package com.mass.flightplan.model.aixm;
 
 import com.mass.flightplan.db.AirspaceEntity;
 import com.mass.flightplan.db.DatasetEntity;
-import com.mass.flightplan.db.GeometryConverter;
+import com.mass.flightplan.util.GeometryConverter;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
@@ -15,12 +15,13 @@ import javax.measure.quantity.Length;
 import java.util.Set;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class Airspace {
 
     @NonNull String id;
     @NonNull String type;
     @NonNull String code;
+    @Nullable String name;
     @Nullable String remarks;
     @Nullable String activationType;
     @Nullable String activationRemarks;

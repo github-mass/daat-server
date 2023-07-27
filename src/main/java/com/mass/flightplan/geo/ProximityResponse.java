@@ -7,6 +7,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.lang.Nullable;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -235,6 +236,9 @@ public class ProximityResponse {
         @JsonProperty("code")
         String code;
 
+        @JsonProperty("name")
+        String name;
+
         @JsonProperty("remark")
         @Nullable
         String remark;
@@ -259,6 +263,9 @@ public class ProximityResponse {
 
         @JsonProperty("dist_m")
         double distanceM;
+
+        @JsonProperty("quj")
+        double quj;
     }
 
     @Value
@@ -271,10 +278,21 @@ public class ProximityResponse {
         String areaId;
 
         @JsonProperty("name")
-        @Nullable
         String name;
+
+        @JsonProperty("commune")
+        String commune;
+
+        @JsonProperty("authority")
+        String authority;
+
+        @JsonProperty("effective")
+        LocalDate effective;
 
         @JsonProperty("dist_m")
         double distanceM;
+
+        @JsonProperty("quj")
+        double quj;
     }
 }

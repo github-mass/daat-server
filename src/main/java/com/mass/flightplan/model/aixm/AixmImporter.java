@@ -46,8 +46,6 @@ public class AixmImporter {
 
     private final AltitudeService altitudeService;
 
-    private boolean parseSiaExport;
-
     @Value
     @Builder
     public static class Result {
@@ -106,7 +104,7 @@ public class AixmImporter {
         if(aixmFile == null){
             throw new IllegalStateException("Could not find AIXM file in directory: " + dir);
         }
-        if(siaFile == null && parseSiaExport){
+        if(siaFile == null){
             throw new IllegalStateException("Could not find SIA file in directory: " + dir);
         }
 
@@ -121,14 +119,13 @@ public class AixmImporter {
         builder.dataset(ds);
         performAixmImport(extractor, builder);
 
-        if(siaFile != null){
-            s2 = now();
-            log.atLevel(Level.INFO).log("Loading SIA data from {}", siaFile);
-            extractor = XPathDocumentExtractor.from(siaFile.toPath()).namespaceAware(false).build();
-            log.atLevel(Level.INFO).log("Done loading SIA data from {} in {}s", siaFile, Duration.between(s2, now()).toMillis() / 1000d);
+        s2 = now();
+        log.atLevel(Level.INFO).log("Loading SIA data from {}", siaFile);
+        extractor = XPathDocumentExtractor.from(siaFile.toPath()).namespaceAware(false).build();
+        log.atLevel(Level.INFO).log("Done loading SIA data from {} in {}s", siaFile, Duration.between(s2, now()).toMillis() / 1000d);
 
-            performHelipadAdminUpdate(extractor, builder);
-        }
+        performHelipadAdminUpdate(extractor, builder);
+        performSiaAirspacesExtraction(extractor, builder);
 
         log.atLevel(Level.INFO).log("DIRECTORY import complete in {}s", Duration.between(start, now()).toMillis() / 1000d);
 
@@ -162,10 +159,8 @@ public class AixmImporter {
                         aixmExtractor = XPathDocumentExtractor.from(res).namespaceAware(false).build();
                         break;
                     case SIA_EXPORT:
-                        if(parseSiaExport){
-                            siaExtractor = XPathDocumentExtractor.from(res).namespaceAware(false).build();
-                            break;
-                        }
+                        siaExtractor = XPathDocumentExtractor.from(res).namespaceAware(false).build();
+                        break;
                 }
             }
         }
@@ -173,7 +168,7 @@ public class AixmImporter {
         if(aixmExtractor == null){
             throw new IllegalStateException("Could not find AIXM file in archive: " + source);
         }
-        if(siaExtractor == null && parseSiaExport){
+        if(siaExtractor == null){
             throw new IllegalStateException("Could not find SIA file in archive: " + source);
         }
 
@@ -185,9 +180,9 @@ public class AixmImporter {
         builder.dataset(ds);
         performAixmImport(aixmExtractor, builder);
 
-        if(siaExtractor != null){
-            performHelipadAdminUpdate(siaExtractor, builder);
-        }
+        performHelipadAdminUpdate(siaExtractor, builder);
+
+        performSiaAirspacesExtraction(siaExtractor, builder);
 
         log.atLevel(Level.INFO).log("ZIP import complete in {}s", Duration.between(start, now()).toMillis() / 1000d);
 
@@ -259,15 +254,6 @@ public class AixmImporter {
         counter.addAndGet(subCount);
         log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'D'");
 
-        // Getting errors on the geometry of some of these...
-//        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.NATURAL_RESERVE), extractor, builder);
-//        counter.addAndGet(subCount);
-//        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'natural reserve'");
-
-        subCount = performAirspaceExtraction(AirspaceExtractor.forType(AirspaceType.PARACHUTING_ZONE), extractor, builder);
-        counter.addAndGet(subCount);
-        log.atLevel(Level.INFO).log("Extracted {} {} airspaces", subCount, "'parachute zone'");
-
         log.atLevel(Level.INFO).log("Extracted {} airspaces in {}s", counter.getAndSet(0), Duration.between(start, now()).toMillis() / 1000d);
     }
 
@@ -309,6 +295,35 @@ public class AixmImporter {
         log.atLevel(Level.INFO).log(
             "Found {} mappings and updated {} heliports out of {} in {}s",
             admins.size(), counter.get(), updated.size(), Duration.between(start, now()).toMillis() / 1000d
+        );
+    }
+
+    void performSiaAirspacesExtraction(@NonNull XPathDocumentExtractor extractor, @NonNull Result.ResultBuilder builder)
+        throws Exception
+    {
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.NATURAL_RESERVE);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.PARACHUTING_ZONE);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.NO_LOW_OVERFLIGHT);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.RECREATIONAL_AEROBATICS);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.RECREATIONAL_MODEL_AIRCRAFT_FLIGHT);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.RECREATIONAL_WINCH_ASSISTED_FREE_FLIGHT_LAUNCH);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.RECREATIONAL_WINCH_ASSISTED_GLIDER_LAUNCH);
+        extractAirspaceTypeFromSiaXml(extractor, builder, AirspaceType.RECREATIONAL_WINCH_ASSISTED_GLIDER_AND_FREE_FLIGHT_LAUNCH);
+    }
+
+    void extractAirspaceTypeFromSiaXml(@NonNull XPathDocumentExtractor extractor, @NonNull Result.ResultBuilder builder, @NonNull AirspaceType type)
+        throws Exception
+    {
+        Instant start = now();
+        AtomicInteger counter = new AtomicInteger();
+
+        log.atLevel(Level.INFO).log("Extracting {} from SIA export", type);
+
+        SiaZoneExtractor.forAirspaceType(type).extract(extractor).stream().peek(x -> counter.incrementAndGet()).forEach(builder::airspace);
+
+        log.atLevel(Level.INFO).log(
+            "Extracted {} {} areas in {}s",
+            counter.get(), type,Duration.between(start, now()).toMillis() / 1000d
         );
     }
 }
