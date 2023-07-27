@@ -1,7 +1,7 @@
 package com.mass.flightplan.db;
 
-import com.mass.flightplan.aixm.Heliport;
-import com.mass.flightplan.aixm.TakeOffLandingArea;
+import com.mass.flightplan.model.aixm.Heliport;
+import com.mass.flightplan.model.aixm.TakeOffLandingArea;
 import lombok.*;
 import org.geotools.measure.Units;
 import org.springframework.data.annotation.Id;

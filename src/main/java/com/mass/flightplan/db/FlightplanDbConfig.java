@@ -2,6 +2,7 @@ package com.mass.flightplan.db;
 
 import com.mongodb.MongoClientSettings;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.autoconfigure.mongo.MongoPropertiesClientSettingsBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,7 +34,7 @@ public class FlightplanDbConfig
     }
 
     @Override
-    protected void configureClientSettings(MongoClientSettings.Builder builder) {
+    protected void configureClientSettings(MongoClientSettings.@NotNull Builder builder) {
         new MongoPropertiesClientSettingsBuilderCustomizer(mongoProperties).customize(builder);
     }
 
@@ -61,4 +62,5 @@ public class FlightplanDbConfig
     protected boolean autoIndexCreation() {
         return true;
     }
+
 }

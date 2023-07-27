@@ -1,11 +1,17 @@
 package com.mass.flightplan.db;
 
-import com.mass.flightplan.aixm.Aerodrome;
-import com.mass.flightplan.aixm.Airspace;
-import com.mass.flightplan.aixm.AixmImporter;
-import com.mass.flightplan.aixm.Heliport;
+import com.mass.flightplan.geo.GeoUtils;
+import com.mass.flightplan.model.aixm.Aerodrome;
+import com.mass.flightplan.model.aixm.Airspace;
+import com.mass.flightplan.model.aixm.AixmImporter;
+import com.mass.flightplan.model.aixm.Heliport;
+import com.mass.flightplan.util.GeometryConverter;
+import com.mass.flightplan.util.GeometryFixer;
+import com.mongodb.MongoWriteException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Geometry;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.lang.NonNull;
 
@@ -21,8 +27,10 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 public class AixmDbImporter {
 
     private final @lombok.NonNull MongoTemplate mongo;
+    private final @lombok.NonNull GeometryConverter geometryConverter;
+    private final @lombok.NonNull GeometryFixer geometryFixer;
 
-    public void importResult(@NonNull AixmImporter.Result result){
+    public DatasetEntity importResult(@NonNull AixmImporter.Result result){
         log.info("Storing dataset to DB: {}", result.dataset());
         DatasetEntity dse = result.dataset().toEntity();
         dse = mongo.insert(dse);
@@ -32,11 +40,13 @@ public class AixmDbImporter {
         }
         catch (Exception x) {
             log.error("Storing of dataset {} failed; rolling back.", dse, x);
-            rollback(dse);
+            purge(dse);
         }
+
+        return dse;
     }
 
-    private void rollback(DatasetEntity dse){
+    public void purge(DatasetEntity dse){
         if(dse.id() == null){
             return ;
         }
@@ -59,7 +69,7 @@ public class AixmDbImporter {
 
         for(Aerodrome ae: result.aerodromes()){
             //if there's a CTR, take care of that first
-            AerodromeEntity aee = ae.toEntity(dse);
+            AerodromeEntity aee = ae.toEntity(dse, geometryConverter);
 
             AirspaceEntity ctr = aee.ctr();
             if(ctr != null){
@@ -75,13 +85,53 @@ public class AixmDbImporter {
         }
 
         for(Airspace as: result.airspaces()){
-            AirspaceEntity ase = as.toEntity(dse);
-            mongo.insert(ase);
+            AirspaceEntity ase = as.toEntity(dse, geometryConverter);
+            try {
+                mongo.insert(ase);
+            }
+            catch (DataIntegrityViolationException divex) {
+                if(maybeInvalidGeometryError(divex)){
+                    //trying fixing geometry and insert again
+                    //We might consider marking the object to the effect that we've had to alter the geometry and that results might be inaccurate...
+                    ase = tryFixAirspaceGeometry(ase);
+                    try {
+                        mongo.insert(ase);
+                        log.info("Geometry fixed successfully: {}", ase);
+                    }
+                    catch (Exception x) {
+                        log.warn("Fixing geometry failed for {}", ase, x);
+                        throw divex; //re-throw original exception
+                    }
+                }
+            }
         }
 
         dse.imported(now());
         mongo.save(dse);
 
         log.info("Done storing after {}s", between(start, now()).toMillis() / 1000d);
+    }
+
+    static boolean maybeInvalidGeometryError(Throwable t){
+        if(t instanceof DataIntegrityViolationException divex){
+            if(divex.getCause() instanceof MongoWriteException mwex){
+                return mwex.getError().getCode() == 16755 || mwex.getError().getMessage().toLowerCase().contains("can't extract geo keys");
+            }
+        }
+
+        return false;
+    }
+
+    AirspaceEntity tryFixAirspaceGeometry(AirspaceEntity ae){
+        log.debug("Attempting to fix geometry: {}", ae);
+        try {
+            Geometry geom = GeoUtils.toGeometry(ae.geometry());
+            geom = geometryFixer.fix(geom);
+            return ae.geometry(geometryConverter.convert(geom));
+        }
+        catch (Exception x) {
+            log.warn("Failed to fix geometry for {}", ae, x);
+            return ae;
+        }
     }
 }

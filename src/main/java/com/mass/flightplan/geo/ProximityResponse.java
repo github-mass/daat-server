@@ -7,6 +7,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.lang.Nullable;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,8 +25,9 @@ public class ProximityResponse {
     @JsonProperty("alt_m")
     double altitudeM;
 
-    @JsonProperty("dataset")
-    DatasetInfo dataset;
+    @JsonProperty("datasets")
+    @Singular
+    List<DatasetInfo> datasets;
 
     @JsonProperty("proxHp")
     @Singular
@@ -39,6 +41,11 @@ public class ProximityResponse {
     @Singular
     List<ProximateAirspace> proximateAirspaces;
 
+    @JsonProperty("proxZicad")
+    @Singular
+    List<ProximateZicad> proximateZicads;
+
+
     @Value
     @Builder
     @EqualsAndHashCode
@@ -47,8 +54,8 @@ public class ProximityResponse {
         @JsonProperty("source")
         String source;
 
-        @JsonProperty("created")
-        Instant created;
+//        @JsonProperty("created")
+//        Instant created;
 
         @JsonProperty("effective")
         Instant effective;
@@ -229,9 +236,20 @@ public class ProximityResponse {
         @JsonProperty("code")
         String code;
 
+        @JsonProperty("name")
+        String name;
+
         @JsonProperty("remark")
         @Nullable
         String remark;
+
+        @JsonProperty("activationType")
+        @Nullable
+        String activationType;
+
+        @JsonProperty("activationRemark")
+        @Nullable
+        String activationRemark;
 
         @JsonProperty("minFloor")
         String minFloor;
@@ -241,9 +259,40 @@ public class ProximityResponse {
 
         @JsonProperty("frontiers")
         @Nullable
-        List<String> frontiers;
+        Set<String> frontiers;
 
         @JsonProperty("dist_m")
         double distanceM;
+
+        @JsonProperty("quj")
+        double quj;
+    }
+
+    @Value
+    @Builder
+    @EqualsAndHashCode
+    @Getter(onMethod = @__(@JsonProperty))
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public static class ProximateZicad {
+        @JsonProperty("areaId")
+        String areaId;
+
+        @JsonProperty("name")
+        String name;
+
+        @JsonProperty("commune")
+        String commune;
+
+        @JsonProperty("authority")
+        String authority;
+
+        @JsonProperty("effective")
+        LocalDate effective;
+
+        @JsonProperty("dist_m")
+        double distanceM;
+
+        @JsonProperty("quj")
+        double quj;
     }
 }

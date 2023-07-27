@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.mass</groupId>
     <artifactId>flightplan-server</artifactId>
-    <version>1.0.1</version>
+    <version>1.2.0</version>
     <name>Flightplan Server</name>
     <description>Backend for the Flightplan app</description>
 
@@ -142,6 +142,21 @@
             <version>${geotools.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-geojson-core</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools.xsd</groupId>
+            <artifactId>gt-xsd-kml</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.measure</groupId>
             <artifactId>unit-api</artifactId>
             <version>${javax-measure-api.version}</version>
@@ -151,6 +166,12 @@
             <artifactId>vtd-xml</artifactId>
             <version>${vtd-xml.version}</version>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>com.esri.geometry</groupId>-->
+<!--            <artifactId>esri-geometry-api</artifactId>-->
+<!--            <version>2.2.4</version>-->
+<!--        </dependency>-->
 
         <!-- TEST DEPENDENCIES -->
         <dependency>

@@ -1,0 +1,31 @@
+logging:
+  level:
+    com.mass: TRACE
+
+vac-atlas:
+  update:
+    enabled: false
+
+altitude-service:
+  type: "ign"
+  ign:
+    rest-service-url: 'https://wxs.ign.fr/calcul/alti/rest/elevation.json'
+
+zicad:
+  import:
+    sources:
+      - uri: "file:data/zicad/Arrete_ZICAD_01-2023.kml"
+
+  update:
+    enabled: false
+
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: "4.0.21"
+
+spring:
+  cache:
+    type: none

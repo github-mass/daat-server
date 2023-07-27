@@ -1,10 +1,10 @@
 package com.mass.flightplan;
 
-import com.mass.flightplan.aixm.AixmImporter;
 import com.mass.flightplan.db.AixmDbImporter;
 import com.mass.flightplan.db.DatasetEntity;
 import com.mass.flightplan.db.DatasetRepository;
 import com.mass.flightplan.geo.AltitudeService;
+import com.mass.flightplan.model.aixm.AixmImporter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -39,9 +41,9 @@ public class AixmUpdateService {
         }
 
         try {
-            log.info("Checking for updated sources");
+            log.info("Checking for updated AIXM sources");
 
-            List<String> todo = sourcesToBeImported();
+            List<AixmProperties.AixmImportSource> todo = sourcesToBeImported();
 
             log.info("Found sources to import: {}", todo);
 
@@ -52,28 +54,35 @@ public class AixmUpdateService {
         }
     }
 
-    private List<String> sourcesToBeImported() {
-        List<String> sources = properties.getImport().getSources();
+    private List<AixmProperties.AixmImportSource> sourcesToBeImported() {
+        List<AixmProperties.AixmImportSource> sources = properties.getImport().getSources();
+        log.debug("Found sources: {}", sources);
+
         if(sources == null || sources.isEmpty()){
             return List.of();
         }
 
-        List<String> copy = new ArrayList<>(sources);
+        List<AixmProperties.AixmImportSource> copy = new ArrayList<>(sources);
 
-        for (DatasetEntity dse : dataSetRepo.findAll()) {
-            copy.remove(dse.sourceName());
+        Set<String> existing = new HashSet<>();
+        for (DatasetEntity dse : dataSetRepo.findAllAixm()) {
+            if(dse.deprecated() != Boolean.TRUE) {
+                existing.add(dse.sourceName());
+            }
         }
+
+        copy.removeIf(s -> existing.contains(s.getUri()));
 
         return copy;
     }
 
-    void performImport(List<String> sources) {
-        for (String source : sources) {
+    void performImport(List<AixmProperties.AixmImportSource> sources) {
+        for (AixmProperties.AixmImportSource source : sources) {
             log.info("Trying to import: {}", source);
 
             Resource res;
             try {
-                URI uri = URI.create(source);
+                URI uri = URI.create(source.getUri());
                 res = new UrlResource(uri);
             }
             catch (IllegalArgumentException | MalformedURLException x) {
@@ -90,14 +99,13 @@ public class AixmUpdateService {
         }
     }
 
-    void performImport(String name, Resource resource)
+    void performImport(AixmProperties.AixmImportSource source, Resource resource)
         throws Exception
     {
         AixmImporter imp = AixmImporter.builder()
-                                       .sourceName(name)
-                                       .sourceType("SIA/AIXM")
+                                       .sourceName(source.getUri())
+                                       .sourceDescription(source.getDescription())
                                        .altitudeService(altitudeService)
-                                       .parseSiaExport(properties.getImport().isParseSiaExport())
                                        .source(resource)
                                        .build();
 

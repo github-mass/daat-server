@@ -14,10 +14,7 @@ import org.locationtech.jts.operation.distance.DistanceOp;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
-import org.springframework.data.mongodb.core.geo.GeoJson;
-import org.springframework.data.mongodb.core.geo.GeoJsonMultiPolygon;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
-import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import org.springframework.lang.NonNull;
 import si.uom.SI;
 
@@ -26,15 +23,15 @@ import javax.measure.UnitConverter;
 import javax.measure.quantity.Length;
 import java.awt.geom.Point2D;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.*;
 import static java.time.Instant.now;
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,36 +42,37 @@ public class ProximityService {
     private final AerodromeRepository adRepo;
     private final HeliportRepository hpRepo;
     private final AirspaceRepository asRepo;
+    private final ZicadRepository zicadRepo;
     private final ProximityServiceProperties properties;
 
     public ProximityResponse computeFor(@NonNull Point location) {
         try {
-            return tryComputeFor(location);
+            var responseBuilder = ProximityResponse.builder().location(location);
+
+            Quantity<Length> alt = altitudeService.getAltitudeAt(location);
+            responseBuilder.altitudeM(alt.to(Units.METRE).getValue().doubleValue());
+
+            tryComputeAixmFor(location, responseBuilder);
+            tryComputeZicadFor(location, responseBuilder);
+
+            return responseBuilder.build();
         }
         catch (Exception x) {
             throw new RuntimeException("Could not compute proximity response for " + location, x);
         }
     }
 
-    private ProximityResponse tryComputeFor(@NonNull Point queryLocation) {
-        /*
-            Query altitude.
-         */
+    private void tryComputeAixmFor(@NonNull Point queryLocation, ProximityResponse.ProximityResponseBuilder responseBuilder) {
 
-        var responseBuilder = ProximityResponse.builder().location(queryLocation);
-
-        Quantity<Length> alt = altitudeService.getAltitudeAt(queryLocation);
-
-        responseBuilder.altitudeM(alt.to(Units.METRE).getValue().doubleValue());
-
-        DatasetEntity dataset = datasetRepo.current();
+        DatasetEntity dataset = datasetRepo.currentAixm();
 
         if (dataset == null || dataset.effective().isAfter(now())) {
-            throw new IllegalStateException("No valid dataset available (%s)".formatted(dataset));
+            log.warn("No current ZICAD dataset available ({})", dataset);
+            return ;
         }
 
         var ds = ProximityResponse.DatasetInfo.builder();
-        ds.source(dataset.origin()).effective(dataset.effective()).created(dataset.created());
+        ds.source(dataset.datasetType()).effective(dataset.effective());
         responseBuilder.dataset(ds.build());
 
         final GeodeticCalculator geoCalc = new GeodeticCalculator();
@@ -135,31 +133,36 @@ public class ProximityService {
             var pa = ProximityResponse.ProximateAirspace.builder()
                                                         .code(as.code())
                                                         .type(as.type())
+                                                        .name(as.name())
                                                         .remark(as.remark())
+                                                        .activationType(as.activationType())
+                                                        .activationRemark(as.activationRemark())
                                                         .frontiers(as.frontiers())
                                                         .minFloor(as.minFloor())
                                                         .maxCeiling(as.maxCeiling());
 
-            Geometry geom = toGeometry(as.geometry());
-            double dist;
+            Geometry geom = GeoUtils.toGeometry(as.geometry());
+            double dist, quj;
 
             org.locationtech.jts.geom.Point locAsJtsPoint = JTSFactoryFinder
                 .getGeometryFactory().createPoint(new Coordinate(queryLocation.getX(), queryLocation.getY()));
 
             if (geom.contains(locAsJtsPoint)) {
-                dist = 0;
+                dist = quj = 0;
                 insideAirspaces.add(as.id());
             }
             else {
-                Coordinate[] closest = DistanceOp.nearestPoints(geom, locAsJtsPoint);
+                Coordinate[] closest = DistanceOp.nearestPoints(locAsJtsPoint, geom);
 
                 geoCalc.setStartingGeographicPoint(closest[0].x, closest[0].y);
                 geoCalc.setDestinationGeographicPoint(closest[1].x, closest[1].y);
 
                 dist = geoCalc.getOrthodromicDistance();
+                quj = azimuthToBearing(geoCalc.getAzimuth());
             }
 
             pa.distanceM(dist);
+            pa.quj(quj);
 
             responseBuilder.proximateAirspace(pa.build());
         }
@@ -275,39 +278,73 @@ public class ProximityService {
 
             responseBuilder.proximateAerodrome(pa.build());
         }
-
-        return responseBuilder.build();
     }
 
+    void tryComputeZicadFor(@NonNull Point queryLocation, ProximityResponse.ProximityResponseBuilder responseBuilder){
+        DatasetEntity dataset = datasetRepo.currentZicad();
 
-    static Geometry toGeometry(GeoJson<?> geojson) {
-        GeometryFactory gf = JTSFactoryFinder.getGeometryFactory();
-        switch (geojson.getType()) {
-            case "Point" -> {
-                GeoJsonPoint p = (GeoJsonPoint) geojson;
-                return gf.createPoint(new Coordinate(p.getX(), p.getY()));
+        if (dataset == null || dataset.effective().isAfter(now())) {
+            log.warn("No current ZICAD dataset available ({})", dataset);
+            return ;
+        }
+
+        var ds = ProximityResponse.DatasetInfo.builder();
+        ds.source(dataset.datasetType()).effective(dataset.effective());
+        responseBuilder.dataset(ds.build());
+
+        final GeodeticCalculator geoCalc = new GeodeticCalculator();
+        final UnitConverter degreesToRadians = Units.DEGREE_ANGLE.getConverterTo(Units.RADIAN);
+        final GeometryFactory gFact = JTSFactoryFinder.getGeometryFactory();
+
+        List<ZicadEntity> zicads = zicadRepo.findByDatasetAndGeometryNear(
+            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getZicadMaxDistanceKM(), Metrics.KILOMETERS)
+        );
+
+        for (ZicadEntity ze: zicads) {
+            if(ze.effective().isAfter(now())){
+                log.debug("Skipping ZICAD entry as it's not yet effective: {}", ze);
+                continue;
             }
-            case "Polygon" -> {
-                GeoJsonPolygon p = (GeoJsonPolygon) geojson;
-                return p.getCoordinates().stream()
-                        .flatMap(ls -> ls.getCoordinates().stream())
-                        .map(point -> new Coordinate(point.getX(), point.getY()))
-                        .collect(Collectors.collectingAndThen(toList(), l -> gf.createPolygon(l.toArray(Coordinate[]::new))));
+
+            var zb = ProximityResponse.ProximateZicad.builder();
+            zb
+                .name(ze.siteName())
+                .areaId(ze.areaId())
+                .commune(ze.commune())
+                .authority(ze.ministry())
+                .effective(LocalDate.ofInstant(ze.effective(), ZoneId.systemDefault()))
+            ;
+
+
+            Geometry geom = GeoUtils.toGeometry(ze.geometry());
+            double dist, quj;
+
+            org.locationtech.jts.geom.Point locAsJtsPoint = gFact.createPoint(new Coordinate(queryLocation.getX(), queryLocation.getY()));
+
+            if (geom.contains(locAsJtsPoint)) {
+                dist = quj = 0;
             }
-            case "MultiPolygon" -> {
-                GeoJsonMultiPolygon p = (GeoJsonMultiPolygon) geojson;
-                return p.getCoordinates().stream()
-                        .map(ProximityService::toGeometry)
-                        .collect(Collectors.collectingAndThen(toList(), gf::buildGeometry));
+            else {
+                Coordinate[] closest = DistanceOp.nearestPoints(locAsJtsPoint, geom);
+
+                geoCalc.setStartingGeographicPoint(closest[0].x, closest[0].y);
+                geoCalc.setDestinationGeographicPoint(closest[1].x, closest[1].y);
+
+                dist = geoCalc.getOrthodromicDistance();
+                quj = azimuthToBearing(geoCalc.getAzimuth());
             }
-            default -> throw new IllegalArgumentException("Unexpected GeoJSON: " + geojson);
+
+            zb.distanceM(dist);
+            zb.quj(quj);
+
+            responseBuilder.proximateZicad(zb.build());
         }
     }
 
     /**
      * Convert [-180, 180] azimuth to [0, 360[ bearing.
      */
-    static double azimuthToBearing(double az){
+    static double azimuthToBearing(double az) {
         return az < 0 ? az + 360 : az;
     }
 
@@ -317,8 +354,8 @@ public class ProximityService {
         double az = calc.getAzimuth();
 
         double relAz = az - runwayBearing;
-        while(relAz > 90) relAz -= 180;
-        while(relAz < -90) relAz += 180;
+        while (relAz > 90) relAz -= 180;
+        while (relAz < -90) relAz += 180;
 
         return relAz;
     }

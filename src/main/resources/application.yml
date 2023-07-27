@@ -15,10 +15,26 @@ vac-atlas:
 aixm:
   import:
     sources:
-      - "file:aixm/export_xml_bd_sia_2023-05-18-a3"
-      - "file:aixm/export_xml_bd_sia_2023-06-15-x1"
-      - "file:aixm/export_xml_bd_sia_2023-07-13-b5"
+#      - uri: "file:data/aixm/export_xml_bd_sia_2023-05-18-a3"
+#        description: "SIA dataset from 2023-05-18"
+#      - uri: "file:data/aixm/export_xml_bd_sia_2023-06-15-x1"
+#        description: "SIA dataset from 2023-06-15"
+      - uri: "file:data/aixm/export_xml_bd_sia_2023-07-13-b5"
+        description: "SIA dataset from 2023-07-13"
     parse-sia-export: true
+
+  update:
+    enabled: true
+    initial-delay: 0
+    fixed-delay: 60
+
+zicad:
+  import:
+    sources:
+      - uri: "https://www.geoportail.gouv.fr/depot/layers/ORTHOIMAGERY.ORTHOPHOS.RESTRICTEDAREAS/kml/Arrete_ZICAD_01-2023.kml"
+        description: "ZICAD dataset from 2023-03-02"
+#      - uri: "https://www.data.gouv.fr/fr/datasets/r/0a4cfab5-465a-45e2-bc83-ad65c299bc90"
+#        description: "ZICAD dataset from 2023-03-02"
 
   update:
     enabled: true

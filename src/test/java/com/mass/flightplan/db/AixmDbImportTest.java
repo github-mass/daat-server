@@ -1,8 +1,8 @@
 package com.mass.flightplan.db;
 
 import com.mass.flightplan.ApplicationConfiguration;
-import com.mass.flightplan.aixm.AixmImporter;
 import com.mass.flightplan.geo.AltitudeService;
+import com.mass.flightplan.model.aixm.AixmImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,9 +15,11 @@ import org.springframework.test.context.ActiveProfiles;
 import si.uom.SI;
 import tech.units.indriya.quantity.Quantities;
 
+import java.util.Random;
+
 @DataMongoTest
 @Slf4j
-@ActiveProfiles("test")
+@ActiveProfiles("aixm-test")
 @Import({ApplicationConfiguration.class})
 public class AixmDbImportTest {
 
@@ -29,11 +31,10 @@ public class AixmDbImportTest {
     {
         log.info("Preparing data...");
 
-        AltitudeService altitudeService = coordinate -> Quantities.getQuantity(69, SI.METRE);
+        final Random random = new Random();
+        AltitudeService altitudeService = coordinate -> Quantities.getQuantity(random.nextInt(), SI.METRE);
         AixmImporter imp = AixmImporter.builder()
-                                       .source(new FileSystemResource("./aixm/export_xml_bd_sia_2023-04-20-p2"))
-                                       .parseSiaExport(true)
-                                       .sourceType("SIA")
+                                       .source(new FileSystemResource("./data/aixm/export_xml_bd_sia_2023-04-20-p2"))
                                        .altitudeService(altitudeService)
                                        .sourceName("test-data")
                                        .build();

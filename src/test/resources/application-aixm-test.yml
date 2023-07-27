@@ -1,0 +1,32 @@
+logging:
+  level:
+    com.mass: TRACE
+
+vac-atlas:
+  update:
+    enabled: false
+
+altitude-service:
+  type: "ign"
+  ign:
+    rest-service-url: 'https://wxs.ign.fr/calcul/alti/rest/elevation.json'
+
+aixm:
+  import:
+    sources:
+      - uri: "file:data/aixm/export_xml_bd_sia_2023-05-18-a3"
+    parse-sia-export: true
+
+  update:
+    enabled: false
+
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: "4.0.21"
+
+spring:
+  cache:
+    type: none
