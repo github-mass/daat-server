@@ -1,0 +1,14 @@
+Depuis la mise en service de son outil de production de l’information aéronautique NOPIA, le SIA met à la disposition de ses clients, à chaque cycle AIRAC, deux jeux de données aéronautiques correspondant aux AIP France et outre-mer :
+
+- Fichier « XML-SIA » : ce fichier de données permet d’alimenter les outils ACADEMIC et GeodEasy. Il permet également de générer la carte data pour l’outil GeoTitan et est utilisé pour la production des grandes cartes par le SIA.
+La définition de cet export est non évolutive.
+
+- Fichier AIXM 4.5 : le format AIXM (Aeronautical Information Exchange Model) est un standard pour les échanges de données aéronautiques.
+
+Le fichier export_xml_bd_SIA_aaaa-mm-jj-a9.zip contient les deux jeux de données ainsi que ce fichier Lisez-moi.txt
+
+Le guide d'utilisation de ces fichiers est disponible dans la rubrique FAQs du site Internet du SIA :
+https://www.sia.aviation-civile.gouv.fr/faqs
+
+
+

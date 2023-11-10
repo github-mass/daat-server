@@ -23,6 +23,7 @@ import javax.measure.quantity.Length;
 import javax.xml.xpath.XPathExpressionException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ import static java.util.function.Predicate.not;
 public class SiaZoneExtractor
     implements AixmExtractor<List<Airspace>>
 {
-    public static SiaZoneExtractor forAirspaceType(@NonNull AirspaceType type){
+    public static SiaZoneExtractor forAirspaceType(@NonNull AirspaceType type) {
         return new SiaZoneExtractor("TypeEspace='%s'".formatted(type.siaTypeEspace()), type);
     }
 
@@ -93,7 +94,7 @@ public class SiaZoneExtractor
         throws Exception
     {
         return extractEspaces(dex)
-            .map(partieOp(dex))
+            .map(partieOp(dex)).filter(Objects::nonNull) //filter out airspaces without geometry definition.
             .map(volumeOp(dex))
             .map(p -> {
                 try {
@@ -105,7 +106,7 @@ public class SiaZoneExtractor
                 }
             })
             .toList()
-        ;
+            ;
     }
 
     Stream<Prototype> extractEspaces(@NotNull XPathDocumentExtractor dex)
@@ -115,24 +116,30 @@ public class SiaZoneExtractor
         String xpath = "/SiaExport/Situation/EspaceS/Espace[" + espacePredicate + "]";
 
         return dex.extractNodes(xpath)
-            .stream()
-            .map(n -> {
-                var prot = new Prototype();
-                prot.idEspace(mapAttributes(n).get("pk"));
-                prot.id(mapChildren(n).get("Nom").getTextContent());
-                prot.code(prot.id());
-                return prot;
-            });
+                  .stream()
+                  .map(n -> {
+                      var prot = new Prototype();
+                      prot.idEspace(mapAttributes(n).get("pk"));
+                      prot.id(mapChildren(n).get("Nom").getTextContent());
+                      prot.code(prot.id());
+                      return prot;
+                  });
     }
 
-    UnaryOperator<Prototype> partieOp(@NotNull XPathDocumentExtractor dex){
+    UnaryOperator<Prototype> partieOp(@NotNull XPathDocumentExtractor dex) {
         @Language("XPath")
         String xpathtemplate = "/SiaExport/Situation/PartieS/Partie[Espace/@pk='%s']";
 
         return prot -> {
             try {
                 Node partie = dex.extractNode(xpathtemplate.formatted(prot.idEspace()));
-                Optional.ofNullable(partie).orElseThrow();
+
+                if (partie == null) {
+                    // No actual airspace geometry. Got at least one of these in SIA data.
+                    // What do we do? I think we ignore it?
+                    log.warn("Ignoring airspace ('espace') as it doesn't have a geometry ('partie'): {}", prot);
+                    return null;
+                }
 
                 prot.idPartie(mapAttributes(partie).get("pk"));
 
@@ -155,7 +162,7 @@ public class SiaZoneExtractor
         };
     }
 
-    UnaryOperator<Prototype> volumeOp(@NotNull XPathDocumentExtractor dex){
+    UnaryOperator<Prototype> volumeOp(@NotNull XPathDocumentExtractor dex) {
         @Language("XPath")
         String xpathtemplate = "/SiaExport/Situation/VolumeS/Volume[Partie/@pk='%s']";
 
@@ -241,7 +248,7 @@ public class SiaZoneExtractor
             if (points.size() == 1) {
                 return gf.createPoint(new Coordinate(points.get(0).getX(), points.get(0).getY()));
             }
-            else if(points.size() == 2){
+            else if (points.size() == 2) {
                 return gf.createLineString(new Coordinate[]{
                     new Coordinate(points.get(0).getX(), points.get(0).getY()),
                     new Coordinate(points.get(1).getX(), points.get(1).getY())

@@ -34,7 +34,7 @@ public class AixmDbImportTest {
         final Random random = new Random();
         AltitudeService altitudeService = coordinate -> Quantities.getQuantity(random.nextInt(), SI.METRE);
         AixmImporter imp = AixmImporter.builder()
-                                       .source(new FileSystemResource("./data/aixm/export_xml_bd_sia_2023-04-20-p2"))
+                                       .source(new FileSystemResource("data/aixm/export_xml_bd_sia_2023-11-30-x4"))
                                        .altitudeService(altitudeService)
                                        .sourceName("test-data")
                                        .build();
