@@ -47,7 +47,7 @@ public class GeoConfiguration {
         throws SSLException
     {
         var sslContext = SslContextBuilder.forClient()
-                                          .trustManager(GeoConfiguration.class.getResourceAsStream("/wxs-ign-fr.pem"))
+                                          .trustManager(GeoConfiguration.class.getResourceAsStream("/certigna-ca.pem"))
                                           .build();
 
         return new ReactorClientHttpConnector(
