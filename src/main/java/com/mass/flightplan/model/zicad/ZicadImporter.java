@@ -101,7 +101,7 @@ public class ZicadImporter {
 
         if(ret instanceof HttpsURLConnection sslConn) {
             KeyStore ks = KeyStore.getInstance("jks");
-            ks.load(getClass().getResourceAsStream("/zicadcerts"), "password".toCharArray());
+            ks.load(getClass().getResourceAsStream("/zicad-ca-certs"), "password".toCharArray());
             var tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
 
