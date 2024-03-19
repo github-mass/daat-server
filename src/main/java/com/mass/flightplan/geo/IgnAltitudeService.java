@@ -79,6 +79,6 @@ public class IgnAltitudeService
         double lon;
         double lat;
         double z;
-        double acc;
+        String acc;
     }
 }

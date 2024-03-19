@@ -22,8 +22,8 @@ public class ProximityResponse {
     @JsonProperty("query")
     Point location;
 
-    @JsonProperty("alt_m")
-    double altitudeM;
+    @JsonProperty(value = "alt_m")
+    Double altitudeM;
 
     @JsonProperty("datasets")
     @Singular

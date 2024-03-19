@@ -49,8 +49,18 @@ public class ProximityService {
         try {
             var responseBuilder = ProximityResponse.builder().location(location);
 
-            Quantity<Length> alt = altitudeService.getAltitudeAt(location);
-            responseBuilder.altitudeM(alt.to(Units.METRE).getValue().doubleValue());
+            /*
+                2024-03-19
+                Isolate altitude query. It's been failing repeatedly lately, due to changes in SSL certs or format.
+             */
+            try {
+                Quantity<Length> alt = altitudeService.getAltitudeAt(location);
+                responseBuilder.altitudeM(alt.to(Units.METRE).getValue().doubleValue());
+            }
+            catch (Exception x) {
+                log.warn("Could not compute altitude for location {}", location, x);
+                responseBuilder.altitudeM(null);
+            }
 
             tryComputeAixmFor(location, responseBuilder);
             tryComputeZicadFor(location, responseBuilder);
