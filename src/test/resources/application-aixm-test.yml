@@ -9,7 +9,8 @@ vac-atlas:
 altitude-service:
   type: "ign"
   ign:
-    rest-service-url: 'https://wxs.ign.fr/calcul/alti/rest/elevation.json'
+    rest-service-url: 'https://data.geopf.fr/altimetrie/calcul/alti/rest/elevation.json'
+    data-resource-id: 'ign_rge_alti_wld'
 
 aixm:
   import:

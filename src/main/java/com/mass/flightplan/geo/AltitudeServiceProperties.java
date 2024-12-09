@@ -26,5 +26,7 @@ public class AltitudeServiceProperties {
     public static class IgnServiceProperties {
         @NonNull
         private String restServiceUrl;
+        @NonNull
+        private String dataResourceId;
     }
 }

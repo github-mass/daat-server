@@ -1,8 +1,6 @@
 package com.mass.flightplan.geo;
 
 import com.mass.flightplan.db.*;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.ssl.SslContextBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,12 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
 import javax.net.ssl.SSLException;
 
@@ -39,22 +33,7 @@ public class GeoConfiguration {
     )
         throws SSLException
     {
-        clientBuilder.clientConnector(ignWebServicesHttpClient());
         return new IgnAltitudeService(clientBuilder.build(), properties.getIgn());
-    }
-
-    ClientHttpConnector ignWebServicesHttpClient()
-        throws SSLException
-    {
-        var sslContext = SslContextBuilder.forClient()
-                                          .trustManager(GeoConfiguration.class.getResourceAsStream("/certigna-ca.pem"))
-                                          .build();
-
-        return new ReactorClientHttpConnector(
-            HttpClient.create()
-                      .secure(spec -> spec.sslContext(sslContext))
-                      .wiretap(IgnAltitudeService.class.getCanonicalName(), LogLevel.TRACE, AdvancedByteBufFormat.TEXTUAL)
-        );
     }
 
     @Bean

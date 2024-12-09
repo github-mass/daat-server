@@ -48,8 +48,11 @@ public class IgnAltitudeService
 
         var resp = webClient
             .get()
-            .uri(properties.getRestServiceUrl(), b -> b.queryParam("lat", c.getY()).queryParam("lon", c.getX()).build()
-            )
+            .uri(
+                properties.getRestServiceUrl(),
+                b -> b.queryParam("lat", c.getY()).queryParam("lon", c.getX())
+                      .queryParam("resource", properties.getDataResourceId())
+                      .build())
             .retrieve()
             .onStatus(not(HttpStatusCode::is2xxSuccessful), ClientResponse::createException)
             .bodyToMono(IgnAltitudeResponse.class)
