@@ -8,11 +8,13 @@ import org.springframework.data.geo.Point;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import tech.units.indriya.quantity.Quantities;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Length;
+import java.time.Duration;
 import java.util.List;
 
 import static java.util.function.Predicate.not;
@@ -26,8 +28,15 @@ public class IgnAltitudeService
 
     private final @NonNull AltitudeServiceProperties.IgnServiceProperties properties;
 
+    @SneakyThrows
     @Override
     public Quantity<Length> getAltitudeAt(Point coordinate)
+    {
+        return getAltitudeAt(coordinate, true);
+    }
+
+    private Quantity<Length> getAltitudeAt(Point coordinate, boolean retryOn429)
+            throws InterruptedException
     {
         try {
             var alt = queryAltitude(coordinate);
@@ -35,6 +44,13 @@ public class IgnAltitudeService
             return Quantities.getQuantity(alt.z(), Units.METRE);
         }
         catch (RuntimeException rcex) {
+            if(retryOn429 && rcex instanceof WebClientResponseException.TooManyRequests){
+                Duration wait = Duration.ofMillis(2500);
+                log.warn("Received 429 TOO_MANY_REQUESTS from IGN altitude service. Waiting {}ms and retrying...", wait.toMillis());
+                Thread.sleep(wait.toMillis());
+                return getAltitudeAt(coordinate, false);
+            }
+
             throw new IllegalStateException(
                 String.format("Could not retrieve altitude using IGN service for coordinates lat=%s, lon=%s", coordinate.getY(), coordinate.getX()), rcex
             );
