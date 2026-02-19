@@ -74,7 +74,7 @@ logging:
 server:
   port: 8077
   servlet:
-    application-display-name: 'Flightplan API'
+    application-display-name: 'DAAT API'
     context-path: "/"
 
 management:
@@ -87,15 +87,15 @@ management:
         include: "health, beans, mappings"
   endpoint:
     metrics:
-      enabled: true
+      access: read_only
     health:
-      enabled: true
+      access: read_only
     caches:
-      enabled: true
+      access: read_only
     beans:
-      enabled: true
+      access: read_only
     mappings:
-      enabled: true
+      access: read_only
 
 bucket4j:
   enabled: true
