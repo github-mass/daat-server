@@ -32,7 +32,7 @@ See:
 
 The system has generally been deployed as part of a docker-compose deployment. In that context, data sources can easily be provided as environment properties for Spring to pick up. New data sources can then be added by editing the docker-compose file and refreshing the instances.
 
-> A docker-compose sample is provided under `/data/docker/sample-docker-compose.local.yml`.
+> A docker-compose sample is provided under [assets/sample-docker-compose.local.yml](/doc/assets/sample-docker-compose.local.yml).
 > 
 > Note that this sample assumes that the AIXM and ZICAD data has been added to the container with the backend service 
 > under `/opt/daat-data/`. As this would require rebuilding the image to add new data sources, a more comprehensive solution would fetch those either from the Internet or from a mounted volume. 
