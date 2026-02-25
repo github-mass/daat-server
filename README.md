@@ -11,6 +11,8 @@ This is the **backend** part of the tool. It
 
 A more comprehensive [User Manual](/doc/USER_MANUAL.md) is available.
 
+A **frontend** has been built and is available [here](https://github.com/github-mass/daat-front).
+
 ## Caveat: *French*
 
 **This service currently only works for French territory and will have to be adapted to serve other geographical areas.**
