@@ -1,0 +1,47 @@
+#########################################
+#
+# docker-compose that uses locally-built images
+#
+########################################
+
+version: "3.7"
+
+services:
+  frontend:
+    image: daat-front:2.0.0
+    container_name: 'daat-front'
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+  backend:
+    image: daat-server:2.0.0
+    container_name: 'daat-server'
+    depends_on:
+      - db
+    environment:
+      - "SPRING_DATA_MONGODB_HOST=mongo"
+      - "SPRING_DATA_MONGODB_PORT=27017"
+      - "SERVER_PORT=8077"
+      - "AIXM_UPDATE_ENABLED=true"
+      - "AIXM_IMPORT_SOURCES_0_URI=file:/opt/daat/data/aixm/export_xml_bd_sia_2023-11-30-x4"
+      - "AIXM_IMPORT_SOURCES_0_DESCRIPTION=SIA/AIXM dataset from 2023-11-30"
+      - "ZICAD_UPDATE_ENABLED=true"
+      - "ZICAD_IMPORT_SOURCES_0_URI=file:/opt/daat/data/zicad/Arrete_ZICAD_01-2023.kml"
+      - "ZICAD_IMPORT_SOURCES_0_DESCRIPTION=ZICAD dataset from 2023-03-02"
+    hostname: 'daat-api'
+    ports:
+      - "8077:8077"
+
+  db:
+    image: mongo
+    container_name: 'daat-db'
+    hostname: mongo
+    volumes:
+      - daat-mongodata:/data/db
+    expose:
+      - "27017"
+
+volumes:
+  daat-mongodata:

@@ -1,17 +1,3 @@
-sia:
-  siteplan-url: "https://www.sia.aviation-civile.gouv.fr/plandesite"
-  auto-version:
-    enabled: true
-
-
-vac-atlas:
-  e-aip-version: eAIP_20_APR_2023
-  base-url: https://www.sia.aviation-civile.gouv.fr/dvd/${vac-atlas.e-aip-version}/Atlas-VAC
-  airport-list-js-url: ${vac-atlas.base-url}/Javascript/AeroArraysVac.js
-  helipad-list-js-url: ${vac-atlas.base-url}/Javascript/AeroArraysVach.js
-  airport-card-url-template: ${vac-atlas.base-url}/PDF_AIPparSSection/VAC/AD/AD-2.{code}.pdf
-  helipad-card-url-template: ${vac-atlas.base-url}/PDF_AIPparSSection/VACH/AD/AD-3.{code}.pdf
-
 aixm:
   import:
     sources:
@@ -28,13 +14,12 @@ aixm:
     initial-delay: 0
     fixed-delay: 60
 
+
 zicad:
   import:
     sources:
       - uri: "https://www.geoportail.gouv.fr/depot/layers/ORTHOIMAGERY.ORTHOPHOS.RESTRICTEDAREAS/kml/Arrete_ZICAD_01-2023.kml"
         description: "ZICAD dataset from 2023-03-02"
-#      - uri: "https://www.data.gouv.fr/fr/datasets/r/0a4cfab5-465a-45e2-bc83-ad65c299bc90"
-#        description: "ZICAD dataset from 2023-03-02"
 
   update:
     enabled: true

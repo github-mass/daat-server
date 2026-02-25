@@ -77,7 +77,7 @@ public class ProximityService {
         DatasetEntity dataset = datasetRepo.currentAixm();
 
         if (dataset == null || dataset.effective().isAfter(now())) {
-            log.warn("No current ZICAD dataset available ({})", dataset);
+            log.warn("No current AIXM dataset available ({})", dataset);
             return ;
         }
 
@@ -89,7 +89,7 @@ public class ProximityService {
         final UnitConverter degreesToRadians = Units.DEGREE_ANGLE.getConverterTo(Units.RADIAN);
 
         List<HeliportEntity> heliports = hpRepo.findByDatasetAndCoordinatesNear(
-            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getHelipadMaxDistanceKM(), Metrics.KILOMETERS)
+            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getHelipadMaxDistanceKm(), Metrics.KILOMETERS)
         );
 
         for (HeliportEntity he : heliports) {
@@ -134,7 +134,7 @@ public class ProximityService {
             Do airspaces before we do airports; we'll use this to check whether we're in the CTR.
          */
         List<AirspaceEntity> airspaces = asRepo.findByDatasetAndGeometryNear(
-            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getAirspaceMaxDistanceKM(), Metrics.KILOMETERS)
+            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getAirspaceMaxDistanceKm(), Metrics.KILOMETERS)
         );
 
         final Set<BigInteger> insideAirspaces = new HashSet<>();
@@ -178,7 +178,7 @@ public class ProximityService {
         }
 
         List<AerodromeEntity> airports = adRepo.findByDatasetAndCoordinatesNear(
-            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getAirportMaxDistanceKM(), Metrics.KILOMETERS)
+            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getAirportMaxDistanceKm(), Metrics.KILOMETERS)
         );
 
         for (AerodromeEntity ae : airports) {
@@ -223,11 +223,9 @@ public class ProximityService {
                 double rwyBrg;
                 Point rwyCoord = Optional.ofNullable(rwy.coordinates()).orElse(ae.coordinates());
                 if (rwy.trueBearing() != null) {
-                    //noinspection ConstantConditions
                     rwyBrg = rwy.trueBearing();
                 }
                 else if (rwy.magBearing() != null) {
-                    //noinspection ConstantConditions
                     rwyBrg = rwy.magBearing() + Optional.ofNullable(ae.magVar()).orElse(0d);
                 }
                 else {
@@ -307,7 +305,7 @@ public class ProximityService {
         final GeometryFactory gFact = JTSFactoryFinder.getGeometryFactory();
 
         List<ZicadEntity> zicads = zicadRepo.findByDatasetAndGeometryNear(
-            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getZicadMaxDistanceKM(), Metrics.KILOMETERS)
+            dataset, new GeoJsonPoint(queryLocation), new Distance(properties.getZicadMaxDistanceKm(), Metrics.KILOMETERS)
         );
 
         for (ZicadEntity ze: zicads) {
