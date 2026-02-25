@@ -21,12 +21,12 @@ A few things tie this to French territory:
 
 Firstly, the data format it expects for ingestion: it was designed to use the **AIXM data made available by the [French Aeronautical Information Service](https://www.sia.aviation-civile.gouv.fr/)**. While there is a measure of standardisation in that data format, expect at least a few idiosyncrasies. 
 
-Furthermore, in addition to regulated airspaces, this tool handles an additional dataset called ***ZICAD***. 
+Furthermore, in addition to regulated airspaces, this tool handles a dataset called ***ZICAD***. 
 *ZICADs* are zones that are forbidden to photograph or record. 
 They are an item of French law, and while the concept will likely be found in other jurisdictions as well, the data formats are almost guaranteed to be different. 
 That being said, importing *ZICAD* data is optional.     
 
-Lastly, this tool used a free online service to **resolve the altitude of the query location**. This is a tool provided by the French State: [IGN Altimétrie](https://geoservices.ign.fr/services-geoplateforme-altimetrie) and, at least as of the time of this writing, works only on French territory.
+Lastly, this tool used an online altimetry service to **resolve the altitude of geographical locations**. This is a tool provided by the French State: [IGN Altimétrie](https://geoservices.ign.fr/services-geoplateforme-altimetrie) and, at least as of the time of this writing, works only on French territory.
 
 ## License
 
