@@ -17,9 +17,9 @@
     <properties>
         <java.version>17</java.version>
         <nashorn-core.version>15.4</nashorn-core.version>
-        <geotools.version>29.1</geotools.version>
+        <geotools.version>29.6</geotools.version>
         <spring-data.version>2025.0.8</spring-data.version>
-        <jsoup.version>1.16.1</jsoup.version>
+        <jsoup.version>1.22.1</jsoup.version>
         <spring-cloud.version>2025.0.1</spring-cloud.version>
         <embed-mongo.version>4.24.0</embed-mongo.version>
         <javax-measure-api.version>2.2</javax-measure-api.version>
