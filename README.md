@@ -36,7 +36,7 @@ Note that the data it works with (SIA AIXM and ZICAD) is subject to license requ
 
 ## Technology
 
-This service is built using Spring Boot and is requires at least Java 17. It further expects MongoDB version 7 for persistence. 
+This service is built using Spring Boot 3.5 and requires at least Java 17. It further expects MongoDB version 7 for persistence. 
 
 ## Deployment
 
