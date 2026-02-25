@@ -9,8 +9,6 @@ This is the **backend** part of the tool. It
 - manages data persistence, and 
 - serves the data upon query. 
 
-A more comprehensive [User Manual](/doc/USER_MANUAL.md) is available.
-
 A **frontend** has been built and is available [here](https://github.com/github-mass/daat-front).
 
 ## Caveat: *French*
@@ -41,6 +39,12 @@ This service is built using Spring Boot 3.5 and requires at least Java 17. It fu
 ## Deployment
 
 This service is intended to be deployed in a **Docker container** alongside a database, and the documentation assumes this scenario. That being said, it's a Java Spring application, so it can be run in other ways as well.
+
+---
+
+# User Manual
+
+[Here](/doc/USER_MANUAL.md).
 
 --- 
 
